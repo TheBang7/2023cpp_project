@@ -34,7 +34,6 @@ void ViewMap::begin()
 			putimage(StartX + j * ratio, StartY + i * ratio, &this->props[map->getElement(i, j)]);
 		}
 	}
-	system("pause");
 }
 
 

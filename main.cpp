@@ -4,11 +4,13 @@
 #include<easyx.h>
 #include<graphics.h>
 
-int main(int argc, char* argv[]) {
-    std::cout << "begin" << std::endl;
-    MyMap map(10, 12);
-    map.printMap();
-    ViewMap viewMap(&map);
-    viewMap.begin();
-    return 0;
+int main(int argc, char* argv[])
+{
+	std::cout << "begin" << std::endl;
+	MyMap map(10, 12);
+	map.printMap();
+	ViewMap viewMap(&map);
+	MapCtrl ctrl(&viewMap);
+	ctrl.begin();
+	return 0;
 }
