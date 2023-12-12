@@ -1,12 +1,15 @@
 #ifndef MY_MAP_H
 #define MY_MAP_H
 #include<stack>
-#include<queue>
+#define MAX_CHANGE_SIZE 4
 
-struct change
+struct Change
 {
-	int row, col;
-	int init, final;
+	int row[MAX_CHANGE_SIZE];
+	int col[MAX_CHANGE_SIZE];
+	int init[MAX_CHANGE_SIZE];
+	int final[MAX_CHANGE_SIZE];
+	int all = 0;
 };
 
 class MyMap
@@ -28,6 +31,9 @@ public:
 	int getElement(int x, int y);
 	int getManPositionRow();
 	int getManPositionCol();
+	void dealChange(Change change);
+	void backChange(Change change);
+	bool isInMap(int row, int col);
 
 private:
 	int** mapGrid; // 二维数组指针
@@ -36,8 +42,6 @@ private:
 	int size; //地图大小
 	int manPositionRow; //小人在第几行
 	int manPositionCol; //小人在第几列
-	std::stack<change> backStack;
-	std::queue<change> changeQueue;
 	void generate();
 };
 

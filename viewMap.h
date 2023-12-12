@@ -19,7 +19,8 @@ private:
 	static constexpr int ScreenHeight = 800;
 	int ratio, StartX = 100;
 	MapCtrl* ctrl;
-
+	void updateProp(int row, int col);
+	void updatePropByChange(int row, int col, int prop);
 
 public:
 	ViewMap(MyMap* map);
@@ -28,6 +29,9 @@ public:
 	void quitView();
 	void setCtrl(MapCtrl* ctrl);
 	MapCtrl* getCtrl();
+	MyMap* getMap();
+	void dealChange(Change change);
+	void backChange(Change change);
 };
 
 #endif

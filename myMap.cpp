@@ -6,18 +6,14 @@
 #include<math.h>
 
 
-MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows* cols)
+MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * cols)
 {
-	mapGrid = new int* [numRows];
+	mapGrid = new int*[numRows];
 	for (int i = 0; i < numRows; ++i)
 	{
 		mapGrid[i] = new int[numCols];
 	}
 	generate();
-	std::stack<change> tempStack;
-	std::queue<change> tempQueue;
-	backStack = tempStack;
-	changeQueue = tempQueue;
 }
 
 MyMap::MyMap()
@@ -87,7 +83,8 @@ void MyMap::generate()
 		{
 			row = posRow(gen) % numRows;
 			col = posCol(gen) % numCols;
-		} while (mapGrid[row][col] != Prop::FLOOR);
+		}
+		while (mapGrid[row][col] != Prop::FLOOR);
 		mapGrid[row][col] = Prop::BOX_DEST;
 	}
 
@@ -98,7 +95,8 @@ void MyMap::generate()
 		{
 			row = posRow(gen) % numRows;
 			col = posCol(gen) % numCols;
-		} while (mapGrid[row][col] != Prop::FLOOR);
+		}
+		while (mapGrid[row][col] != Prop::FLOOR);
 		mapGrid[row][col] = Prop::BOX;
 	}
 	//Ëæ»úÉú³ÉMAN
@@ -106,7 +104,8 @@ void MyMap::generate()
 	{
 		row = posRow(gen) % numRows;
 		col = posCol(gen) % numCols;
-	} while (mapGrid[row][col] != Prop::FLOOR);
+	}
+	while (mapGrid[row][col] != Prop::FLOOR);
 	this->manPositionCol = col;
 	this->manPositionRow = row;
 	mapGrid[row][col] = Prop::MAN;
@@ -165,4 +164,35 @@ void MyMap::printMap()
 		}
 		std::cout << std::endl;
 	}
+}
+
+void MyMap::dealChange(Change change)
+{
+	for (int i = 0; i < change.all; i++)
+	{
+		mapGrid[change.row[i]][change.col[i]] = change.final[i];
+		if (change.final[i] == Prop::MAN)
+		{
+			manPositionCol = change.col[i];
+			manPositionRow = change.row[i];
+		}
+	}
+}
+
+void MyMap::backChange(Change change)
+{
+	for (int i = 0; i < change.all; i++)
+	{
+		mapGrid[change.row[i]][change.col[i]] = change.init[i];
+		if (change.init[i] == Prop::MAN)
+		{
+			manPositionCol = change.col[i];
+			manPositionRow = change.row[i];
+		}
+	}
+}
+
+bool MyMap::isInMap(int row, int col)
+{
+	return (row >= 0 && row < this->getNumRows() && col >= 0 && col < this->getNumCols());
 }

@@ -21,6 +21,7 @@ void ViewMap::init_picture()
 	loadimage(&(props[Prop::BOX_DEST]), "resource/des.bmp", this->ratio, this->ratio, true);
 	loadimage(&(props[Prop::WALL]), "resource/wall.bmp", this->ratio, this->ratio, true);
 	loadimage(&(props[Prop::MAN]), "resource/man.bmp", this->ratio, this->ratio, true);
+	loadimage(&(props[Prop::HIT]), "resource/box_hit.bmp", this->ratio, this->ratio, true);
 }
 
 void ViewMap::begin()
@@ -31,9 +32,19 @@ void ViewMap::begin()
 	{
 		for (int j = 0; j < this->map->getNumCols(); j++)
 		{
-			putimage(StartX + j * ratio, StartY + i * ratio, &this->props[map->getElement(i, j)]);
+			updateProp(i, j);
 		}
 	}
+}
+
+void ViewMap::updateProp(int row, int col)
+{
+	putimage(StartX + col * ratio, StartY + row * ratio, &this->props[map->getElement(row, col)]);
+}
+
+void ViewMap::updatePropByChange(int row, int col, int prop)
+{
+	putimage(StartX + col * ratio, StartY + row * ratio, &this->props[prop]);
 }
 
 
@@ -52,7 +63,28 @@ MapCtrl* ViewMap::getCtrl()
 	return this->ctrl;
 }
 
+MyMap* ViewMap::getMap()
+{
+	return this->map;
+}
+
 ViewMap::~ViewMap()
 {
 	delete[] props;
+}
+
+void ViewMap::dealChange(Change change)
+{
+	for (int i = 0; i < change.all; i++)
+	{
+		updatePropByChange(change.row[i], change.col[i], change.final[i]);
+	}
+}
+
+void ViewMap::backChange(Change change)
+{
+	for (int i = 0; i < change.all; i++)
+	{
+		updatePropByChange(change.row[i], change.col[i], change.init[i]);
+	}
 }
