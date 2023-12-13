@@ -63,8 +63,9 @@ void ViewMap::printSubMap(MyMap* subMap, int row, int col)
 			if (map->getElementType(row, col) != Prop::SUB_MAP)
 				putimage(StartX + col * ratio + j * subRatio, StartY + row * ratio + i * subRatio,
 				         &this->subProps[map->getElementType(row, col)]);
-			else putimage(StartX + col * ratio + j * subRatio, StartY + row * ratio + i * subRatio,
-				&this->subProps[Prop::BOX]);
+			else
+				putimage(StartX + col * ratio + j * subRatio, StartY + row * ratio + i * subRatio,
+				         &this->subProps[Prop::BOX]);
 		}
 	}
 }

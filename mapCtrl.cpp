@@ -13,43 +13,18 @@ MapCtrl::MapCtrl(ViewMap* viewMap)
 	this->myMap = viewMap->getMap();
 	manAreaBefore = Prop::FLOOR;
 }
+MapCtrl::~MapCtrl()
+{
+
+}
+
 
 void MapCtrl::begin()
 {
 	bool quit = false;
 	viewMap->begin();
 
-	while (!quit)
-	{
-		if (GetAsyncKeyState(key_up) & 0x8001)
-		{
-			std::cout << "Move Up!" << std::endl;
-			dealUp();
-		}
-		else if (GetAsyncKeyState(key_quit) & 0x8001)
-		{
-			std::cout << "Quit Game!" << std::endl;
-			this->dealQuit();
-			quit = true;
-		}
-		else if (GetAsyncKeyState(key_down) & 0x8001)
-		{
-			std::cout << "Move Down!" << std::endl;
-			this->dealDown();
-		}
-		else if (GetAsyncKeyState(key_left) & 0x8001)
-		{
-			std::cout << "Move Left!" << std::endl;
-			this->dealLeft();
-		}
-		else if (GetAsyncKeyState(key_right) & 0x8001)
-		{
-			std::cout << "Move Right!" << std::endl;
-			this->dealRight();
-		}
-
-		Sleep(200);
-	}
+	
 }
 
 void MapCtrl::dealQuit()
