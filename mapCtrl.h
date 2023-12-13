@@ -24,7 +24,7 @@ public:
 
 private:
 
-	std::stack<MyChange> backStack;
+	std::stack<MyChange*> backStack;
 	ViewMap* viewMap;
 	MyMap* myMap;
 	int manAreaBefore;

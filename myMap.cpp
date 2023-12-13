@@ -192,6 +192,7 @@ void MyMap::dealChange(MyChange* change)
 	for (int i = 0; i < change->all; i++)
 	{
 		mapGrid[change->row[i]][change->col[i]].type = change->final[i];
+		mapGrid[change->row[i]][change->col[i]].map = change->finalSubMap[i];
 		if (change->final[i] == Prop::MAN)
 		{
 			manPositionCol = change->col[i];
@@ -205,6 +206,7 @@ void MyMap::backChange(MyChange* change)
 	for (int i = 0; i < change->all; i++)
 	{
 		mapGrid[change->row[i]][change->col[i]].type = change->init[i];
+		mapGrid[change->row[i]][change->col[i]].map = change->initSubMap[i];
 		if (change->init[i] == Prop::MAN)
 		{
 			manPositionCol = change->col[i];

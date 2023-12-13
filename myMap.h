@@ -5,7 +5,7 @@
 #include "MapGrid.h"
 #include "myChange.h"
 class MapGrid;
-
+class MyChange;
 
 class MyMap
 {

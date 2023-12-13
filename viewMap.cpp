@@ -113,7 +113,10 @@ void ViewMap::dealChange(MyChange* change)
 {
 	for (int i = 0; i < change->all; i++)
 	{
-		updatePropByChange(change->row[i], change->col[i], change->final[i]);
+		if (change->final[i] != Prop::SUB_MAP)
+			updatePropByChange(change->row[i], change->col[i], change->final[i]);
+		else
+			printSubMap(change->finalSubMap[i], change->row[i], change->col[i]);
 	}
 }
 
@@ -121,6 +124,9 @@ void ViewMap::backChange(MyChange* change)
 {
 	for (int i = 0; i < change->all; i++)
 	{
-		updatePropByChange(change->row[i], change->col[i], change->init[i]);
+		if (change->final[i] != Prop::SUB_MAP)
+			updatePropByChange(change->row[i], change->col[i], change->init[i]);
+		else
+			printSubMap(change->initSubMap[i], change->row[i], change->col[i]);
 	}
 }

@@ -13,8 +13,12 @@ MapCtrl::MapCtrl(ViewMap* viewMap)
 	this->myMap = viewMap->getMap();
 	manAreaBefore = Prop::FLOOR;
 }
+
 MapCtrl::~MapCtrl()
 {
+	while (!backStack.empty()) { // 循环弹出栈中的所有元素
+		backStack.pop();
+	}
 
 }
 
@@ -23,8 +27,6 @@ void MapCtrl::begin()
 {
 	bool quit = false;
 	viewMap->begin();
-
-	
 }
 
 void MapCtrl::dealQuit()
@@ -40,7 +42,8 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 	int finalRow = manRow + rowChange;
 	int finalCol = manCol + colChange;
 	while (myMap->isInMap(finalRow, finalCol) &&
-		(myMap->getElementType(finalRow, finalCol) == Prop::BOX || myMap->getElementType(finalRow, finalCol) == Prop::HIT))
+		(myMap->getElementType(finalRow, finalCol) == Prop::BOX || myMap->getElementType(finalRow, finalCol) ==
+			Prop::HIT))
 	{
 		count++;
 		finalCol += colChange;
@@ -56,6 +59,10 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 			change.row[i] = manRow + i * rowChange;
 			change.col[i] = manCol + i * colChange;
 			change.init[i] = myMap->getElementType(change.row[i], change.col[i]);
+			if (change.init[i] == Prop::SUB_MAP)
+			{
+				change.initSubMap[i] = myMap->getSubMap(change.row[i], change.col[i]);
+			} //将subMap指针载入数组
 			if (i == 0)
 			{
 				change.final[i] = manAreaBefore;
@@ -70,7 +77,12 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 			else
 			{
 				change.final[i] = change.init[i - 1];
-				if ((change.init[i] == Prop::HIT || change.init[i] == Prop::BOX_DEST) && change.final[i] == Prop::BOX)
+				if (change.final[i] == Prop::SUB_MAP)
+				{
+					change.finalSubMap[i] = myMap->getSubMap(change.row[i - 1], change.col[i - 1]);
+				}
+				else if ((change.init[i] == Prop::HIT || change.init[i] == Prop::BOX_DEST) && change.final[i] ==
+					Prop::BOX)
 				{
 					change.final[i] = Prop::HIT;
 				}
@@ -81,10 +93,9 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 			}
 		}
 
-
 		myMap->dealChange(&change);
 		viewMap->dealChange(&change);
-		backStack.push(change);
+		backStack.push(&change);
 	}
 }
 
