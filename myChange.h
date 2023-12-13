@@ -1,6 +1,8 @@
+
 #ifndef MY_CHANGE_H
 #define MY_CHANGE_H
-
+#include "myMap.h"
+class MyMap;
 class MyChange
 {
 public:
@@ -10,6 +12,8 @@ public:
 	int* row;
 	int* col;
 	int all;
+	MyMap** initSubMap;
+	MyMap** finalSubMap;
 	~MyChange();
 };
 

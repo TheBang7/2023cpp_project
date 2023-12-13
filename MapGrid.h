@@ -11,6 +11,7 @@ public:
 	int type;
 	MyMap* map;
 	MapGrid();
+	~MapGrid();
 	void setMap(MyMap* map);
 	void setType(int type);
 };

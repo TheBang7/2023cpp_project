@@ -15,3 +15,8 @@ void MapGrid::setType(int type)
 {
 	this->type = type;
 }
+
+MapGrid::~MapGrid()
+{
+	
+}
