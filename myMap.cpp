@@ -4,21 +4,42 @@
 #include<stack>
 #include<queue>
 #include<math.h>
-
+#include "MapGrid.h"
 
 MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * cols)
 {
-	mapGrid = new int*[numRows];
+	mapGrid = new MapGrid*[numRows];
 	for (int i = 0; i < numRows; ++i)
 	{
-		mapGrid[i] = new int[numCols];
+		mapGrid[i] = new MapGrid[numCols];
 	}
 	generate();
 }
 
 MyMap::MyMap()
 {
-	MyMap(10, 10);
+	numCols = 10;
+	numRows = 10;
+	mapGrid = new MapGrid*[numRows];
+	for (int i = 0; i < numRows; ++i)
+	{
+		mapGrid[i] = new MapGrid[numCols];
+	}
+	// 初始化随机数生成器
+	std::random_device seed;
+	std::ranlux48 gen(seed());
+
+	// 全部初始化为 FLOOR
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			if (i == 0 || j == 0 || i == numRows - 1 || j == numCols - 1)
+				mapGrid[i][j].type = Prop::WALL;
+			else
+				mapGrid[i][j].type = Prop::FLOOR;
+		}
+	}
 }
 
 int MyMap::getNumRows()
@@ -31,9 +52,9 @@ int MyMap::getNumCols()
 	return numCols;
 }
 
-int MyMap::getElement(int x, int y)
+int MyMap::getElementType(int x, int y)
 {
-	return mapGrid[x][y];
+	return mapGrid[x][y].type;
 }
 
 void MyMap::generate()
@@ -48,9 +69,9 @@ void MyMap::generate()
 		for (int j = 0; j < numCols; ++j)
 		{
 			if (i == 0 || j == 0 || i == numRows - 1 || j == numCols - 1)
-				mapGrid[i][j] = Prop::WALL;
+				mapGrid[i][j].type = Prop::WALL;
 			else
-				mapGrid[i][j] = Prop::FLOOR;
+				mapGrid[i][j].type = Prop::FLOOR;
 		}
 	}
 
@@ -67,7 +88,7 @@ void MyMap::generate()
 	{
 		row = posRow(gen) % numRows;
 		col = posCol(gen) % numCols;
-		mapGrid[row][col] = Prop::WALL;
+		mapGrid[row][col].type = Prop::WALL;
 	}
 
 	// 随机生成 BOX_DEST 和 BOX 的数量
@@ -84,8 +105,8 @@ void MyMap::generate()
 			row = posRow(gen) % numRows;
 			col = posCol(gen) % numCols;
 		}
-		while (mapGrid[row][col] != Prop::FLOOR);
-		mapGrid[row][col] = Prop::BOX_DEST;
+		while (mapGrid[row][col].type != Prop::FLOOR);
+		mapGrid[row][col].type = Prop::BOX_DEST;
 	}
 
 	// 随机生成 BOX
@@ -96,8 +117,8 @@ void MyMap::generate()
 			row = posRow(gen) % numRows;
 			col = posCol(gen) % numCols;
 		}
-		while (mapGrid[row][col] != Prop::FLOOR);
-		mapGrid[row][col] = Prop::BOX;
+		while (mapGrid[row][col].type != Prop::FLOOR);
+		mapGrid[row][col].type = Prop::BOX;
 	}
 	//随机生成MAN
 	do
@@ -105,10 +126,10 @@ void MyMap::generate()
 		row = posRow(gen) % numRows;
 		col = posCol(gen) % numCols;
 	}
-	while (mapGrid[row][col] != Prop::FLOOR);
+	while (mapGrid[row][col].type != Prop::FLOOR);
 	this->manPositionCol = col;
 	this->manPositionRow = row;
-	mapGrid[row][col] = Prop::MAN;
+	mapGrid[row][col].type = Prop::MAN;
 }
 
 MyMap::~MyMap()
@@ -138,7 +159,7 @@ void MyMap::printMap()
 	{
 		for (int j = 0; j < numCols; ++j)
 		{
-			switch (mapGrid[i][j])
+			switch (mapGrid[i][j].type)
 			{
 			case WALL:
 				std::cout << "# ";
@@ -170,7 +191,7 @@ void MyMap::dealChange(MyChange* change)
 {
 	for (int i = 0; i < change->all; i++)
 	{
-		mapGrid[change->row[i]][change->col[i]] = change->final[i];
+		mapGrid[change->row[i]][change->col[i]].type = change->final[i];
 		if (change->final[i] == Prop::MAN)
 		{
 			manPositionCol = change->col[i];
@@ -183,7 +204,7 @@ void MyMap::backChange(MyChange* change)
 {
 	for (int i = 0; i < change->all; i++)
 	{
-		mapGrid[change->row[i]][change->col[i]] = change->init[i];
+		mapGrid[change->row[i]][change->col[i]].type = change->init[i];
 		if (change->init[i] == Prop::MAN)
 		{
 			manPositionCol = change->col[i];
@@ -195,4 +216,9 @@ void MyMap::backChange(MyChange* change)
 bool MyMap::isInMap(int row, int col)
 {
 	return (row >= 0 && row < this->getNumRows() && col >= 0 && col < this->getNumCols());
+}
+
+MyMap* MyMap::getSubMap(int row, int col)
+{
+	return mapGrid[row][col].map;
 }

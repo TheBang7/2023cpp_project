@@ -27,6 +27,9 @@
     <ClInclude Include="myChange.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MapGrid.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="myMap.cpp">
@@ -42,6 +45,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="myChange.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MapGrid.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

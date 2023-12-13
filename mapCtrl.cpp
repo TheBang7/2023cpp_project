@@ -65,13 +65,13 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 	int finalRow = manRow + rowChange;
 	int finalCol = manCol + colChange;
 	while (myMap->isInMap(finalRow, finalCol) &&
-		(myMap->getElement(finalRow, finalCol) == Prop::BOX || myMap->getElement(finalRow, finalCol) == Prop::HIT))
+		(myMap->getElementType(finalRow, finalCol) == Prop::BOX || myMap->getElementType(finalRow, finalCol) == Prop::HIT))
 	{
 		count++;
 		finalCol += colChange;
 		finalRow += rowChange;
 	}
-	if (!myMap->isInMap(finalRow, finalCol) || myMap->getElement(finalRow, finalCol) == Prop::WALL)return;
+	if (!myMap->isInMap(finalRow, finalCol) || myMap->getElementType(finalRow, finalCol) == Prop::WALL)return;
 	else
 	{
 		MyChange change(count + 1);
@@ -80,7 +80,7 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 		{
 			change.row[i] = manRow + i * rowChange;
 			change.col[i] = manCol + i * colChange;
-			change.init[i] = myMap->getElement(change.row[i], change.col[i]);
+			change.init[i] = myMap->getElementType(change.row[i], change.col[i]);
 			if (i == 0)
 			{
 				change.final[i] = manAreaBefore;

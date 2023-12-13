@@ -1,7 +1,11 @@
 #ifndef MY_MAP_H
 #define MY_MAP_H
 #include<stack>
+
+#include "MapGrid.h"
 #include "myChange.h"
+class MapGrid;
+
 
 class MyMap
 {
@@ -16,18 +20,18 @@ public:
 
 	// 示例方法，打印地图
 	void printMap();
-
 	int getNumCols();
 	int getNumRows();
-	int getElement(int x, int y);
+	int getElementType(int x, int y);
 	int getManPositionRow();
 	int getManPositionCol();
 	void dealChange(MyChange* change);
 	void backChange(MyChange* change);
 	bool isInMap(int row, int col);
+	MyMap* getSubMap(int row, int col);
 
 private:
-	int** mapGrid; // 二维数组指针
+	MapGrid** mapGrid; // 二维数组指针
 	int numRows; // 地图行数
 	int numCols; // 地图列数
 	int size; //地图大小
@@ -43,6 +47,8 @@ enum Prop
 	BOX_DEST,
 	BOX,
 	MAN,
+	EXTRA,
+	SUB_MAP,
 	HIT,
 	ALL
 };

@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="mapCtrl.h" />
+    <ClInclude Include="MapGrid.h" />
     <ClInclude Include="myChange.h" />
     <ClInclude Include="myMap.h" />
     <ClInclude Include="viewMap.h" />
@@ -135,6 +136,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mapCtrl.cpp" />
+    <ClCompile Include="MapGrid.cpp" />
     <ClCompile Include="myChange.cpp" />
     <ClCompile Include="myMap.cpp" />
     <ClCompile Include="viewMap.cpp" />
