@@ -73,18 +73,18 @@ ViewMap::~ViewMap()
 	delete[] props;
 }
 
-void ViewMap::dealChange(Change change)
+void ViewMap::dealChange(MyChange* change)
 {
-	for (int i = 0; i < change.all; i++)
+	for (int i = 0; i < change->all; i++)
 	{
-		updatePropByChange(change.row[i], change.col[i], change.final[i]);
+		updatePropByChange(change->row[i], change->col[i], change->final[i]);
 	}
 }
 
-void ViewMap::backChange(Change change)
+void ViewMap::backChange(MyChange* change)
 {
-	for (int i = 0; i < change.all; i++)
+	for (int i = 0; i < change->all; i++)
 	{
-		updatePropByChange(change.row[i], change.col[i], change.init[i]);
+		updatePropByChange(change->row[i], change->col[i], change->init[i]);
 	}
 }

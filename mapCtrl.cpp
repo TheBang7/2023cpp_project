@@ -60,7 +60,6 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 {
 	int manRow = this->myMap->getManPositionRow();
 	int manCol = this->myMap->getManPositionCol();
-	Change change;
 
 	int count = 1;
 	int finalRow = manRow + rowChange;
@@ -75,6 +74,7 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 	if (!myMap->isInMap(finalRow, finalCol) || myMap->getElement(finalRow, finalCol) == Prop::WALL)return;
 	else
 	{
+		MyChange change(count + 1);
 		change.all = count + 1;
 		for (int i = 0; i <= count; i++)
 		{
@@ -107,8 +107,8 @@ void MapCtrl::dealMove(int const rowChange, int const colChange)
 		}
 
 
-		myMap->dealChange(change);
-		viewMap->dealChange(change);
+		myMap->dealChange(&change);
+		viewMap->dealChange(&change);
 		backStack.push(change);
 	}
 }

@@ -24,6 +24,9 @@
     <ClInclude Include="viewMap.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="myChange.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="myMap.cpp">
@@ -36,6 +39,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="viewMap.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="myChange.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

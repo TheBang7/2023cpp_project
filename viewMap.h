@@ -5,6 +5,7 @@
 
 #include "mapCtrl.h"
 #include "myMap.h"
+#include "myChange.h"
 
 
 class ViewMap
@@ -30,8 +31,8 @@ public:
 	void setCtrl(MapCtrl* ctrl);
 	MapCtrl* getCtrl();
 	MyMap* getMap();
-	void dealChange(Change change);
-	void backChange(Change change);
+	void dealChange(MyChange* change);
+	void backChange(MyChange* change);
 };
 
 #endif

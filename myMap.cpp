@@ -166,28 +166,28 @@ void MyMap::printMap()
 	}
 }
 
-void MyMap::dealChange(Change change)
+void MyMap::dealChange(MyChange* change)
 {
-	for (int i = 0; i < change.all; i++)
+	for (int i = 0; i < change->all; i++)
 	{
-		mapGrid[change.row[i]][change.col[i]] = change.final[i];
-		if (change.final[i] == Prop::MAN)
+		mapGrid[change->row[i]][change->col[i]] = change->final[i];
+		if (change->final[i] == Prop::MAN)
 		{
-			manPositionCol = change.col[i];
-			manPositionRow = change.row[i];
+			manPositionCol = change->col[i];
+			manPositionRow = change->row[i];
 		}
 	}
 }
 
-void MyMap::backChange(Change change)
+void MyMap::backChange(MyChange* change)
 {
-	for (int i = 0; i < change.all; i++)
+	for (int i = 0; i < change->all; i++)
 	{
-		mapGrid[change.row[i]][change.col[i]] = change.init[i];
-		if (change.init[i] == Prop::MAN)
+		mapGrid[change->row[i]][change->col[i]] = change->init[i];
+		if (change->init[i] == Prop::MAN)
 		{
-			manPositionCol = change.col[i];
-			manPositionRow = change.row[i];
+			manPositionCol = change->col[i];
+			manPositionRow = change->row[i];
 		}
 	}
 }

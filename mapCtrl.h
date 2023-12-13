@@ -22,7 +22,7 @@ private:
 	static constexpr char key_left = 'A';
 	static constexpr char key_right = 'D';
 	static constexpr char key_quit = VK_ESCAPE;
-	std::stack<Change> backStack;
+	std::stack<MyChange> backStack;
 	ViewMap* viewMap;
 	MyMap* myMap;
 	int manAreaBefore;

@@ -1,16 +1,7 @@
 #ifndef MY_MAP_H
 #define MY_MAP_H
 #include<stack>
-#define MAX_CHANGE_SIZE 4
-
-struct Change
-{
-	int row[MAX_CHANGE_SIZE];
-	int col[MAX_CHANGE_SIZE];
-	int init[MAX_CHANGE_SIZE];
-	int final[MAX_CHANGE_SIZE];
-	int all = 0;
-};
+#include "myChange.h"
 
 class MyMap
 {
@@ -31,8 +22,8 @@ public:
 	int getElement(int x, int y);
 	int getManPositionRow();
 	int getManPositionCol();
-	void dealChange(Change change);
-	void backChange(Change change);
+	void dealChange(MyChange* change);
+	void backChange(MyChange* change);
 	bool isInMap(int row, int col);
 
 private:
