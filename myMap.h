@@ -1,7 +1,8 @@
 #ifndef MY_MAP_H
 #define MY_MAP_H
 #include<stack>
-
+#include<string>
+#include <unordered_map>
 #include "MapGrid.h"
 #include "myChange.h"
 class MapGrid;
@@ -29,8 +30,21 @@ public:
 	void backChange(MyChange* change);
 	bool isInMap(int row, int col);
 	MyMap* getSubMap(int row, int col);
+	void saveMap(std::string address);
+	void loadMap(std::string address);
+	std::string getMapName();
+	void setMapName(std::string name);
+	void setSubMap(int row, int col, MyMap* subMap);
+	std::string getSubMapNameToSet(int row, int col);
+	void setGridType(int row, int col, int type);
+	void setSubMapName(int row, int col, std::string );
 
 private:
+	std::unordered_map<std::string, MyMap*> hashMap;
+	std::vector<MyMap*>mapList;
+	std::string mapName;
+	bool hasMapGrid=false;
+	void saveMap(std::string address, int countSub);
 	MapGrid** mapGrid; // 二维数组指针
 	int numRows; // 地图行数
 	int numCols; // 地图列数

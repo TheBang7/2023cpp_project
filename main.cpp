@@ -13,8 +13,10 @@ constexpr char key_quit = VK_ESCAPE;
 int main(int argc, char* argv[])
 {
 	std::cout << "begin" << std::endl;
-	MyMap map(10, 12);
+	MyMap map(8, 8);
+	map.loadMap("resource/map/test1.txt");
 	map.printMap();
+	map.setMapName("test3");
 	ViewMap viewMap(&map);
 	MapCtrl ctr(&viewMap);
 	MapCtrl* ctrl = &ctr;
@@ -26,12 +28,6 @@ int main(int argc, char* argv[])
 		{
 			std::cout << "Move Up!" << std::endl;
 			ctrl->dealUp();
-		}
-		else if (GetAsyncKeyState(key_quit) & 0x8001)
-		{
-			std::cout << "Quit Game!" << std::endl;
-			ctrl->dealQuit();
-			quit = true;
 		}
 		else if (GetAsyncKeyState(key_down) & 0x8001)
 		{
@@ -47,6 +43,13 @@ int main(int argc, char* argv[])
 		{
 			std::cout << "Move Right!" << std::endl;
 			ctrl->dealRight();
+		}
+		else if (GetAsyncKeyState(key_quit) & 0x8001)
+		{
+			std::cout << "Quit Game!" << std::endl;
+			ctrl->dealQuit();
+			map.saveMap("resource/map/" + map.getMapName()+".txt");
+			quit = true;
 		}
 
 		Sleep(200);

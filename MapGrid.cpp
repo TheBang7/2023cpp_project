@@ -1,5 +1,6 @@
 #include "MapGrid.h"
 #include "myMap.h"
+#include<iostream>
 MapGrid::MapGrid()
 {
 	this->type = 0;
