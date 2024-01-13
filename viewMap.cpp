@@ -9,10 +9,7 @@ ViewMap::ViewMap(MyMap* map)
 	this->map = map;
 	props = new IMAGE[Prop::ALL];
 	subProps = new IMAGE[Prop::ALL];
-	ratio = (ScreenHeight - 2 * StartY) / max(map->getNumCols(), map->getNumCols());
-	subRatio = ratio / max(map->getNumCols(), map->getNumCols());
-	StartX = (ScreenWidth - ratio * max(map->getNumCols(), map->getNumCols())) / 2;
-	init_picture();
+	initgraph(ScreenWidth, ScreenHeight);
 }
 
 void ViewMap::init_picture()
@@ -24,7 +21,11 @@ void ViewMap::init_picture()
 	loadimage(&(props[Prop::WALL]), "resource/wall.bmp", this->ratio, this->ratio, true);
 	loadimage(&(props[Prop::MAN]), "resource/man.bmp", this->ratio, this->ratio, true);
 	loadimage(&(props[Prop::HIT]), "resource/box_hit.bmp", this->ratio, this->ratio, true);
+}
 
+void ViewMap::loadSubMapPicture(MyMap* subMap)
+{
+	subRatio = ratio / max(subMap->getNumCols(), subMap->getNumCols());
 	loadimage(&(this->subBackground), "resource/background.bmp", ratio, ratio, true);
 	loadimage(&(subProps[Prop::BOX]), "resource/box.bmp", this->subRatio, this->subRatio, true);
 	loadimage(&(subProps[Prop::FLOOR]), "resource/floor.bmp", this->subRatio, this->subRatio, true);
@@ -36,13 +37,18 @@ void ViewMap::init_picture()
 
 void ViewMap::begin()
 {
-	initgraph(ScreenWidth, ScreenHeight);
+
+	ratio = (ScreenHeight - 2 * StartY) / max(map->getNumCols(), map->getNumCols());
+	subRatio = ratio / max(map->getNumCols(), map->getNumCols());
+	StartX = (ScreenWidth - ratio * max(map->getNumCols(), map->getNumCols())) / 2;
+	init_picture();
 	putimage(0, 0, &this->background);
 	this->printMap(this->getMap());
 }
 
 void ViewMap::printMap(MyMap* map)
 {
+	putimage(0, 0, &this->background);
 	for (int i = 0; i < map->getNumRows(); i++)
 	{
 		for (int j = 0; j < map->getNumCols(); j++)
@@ -55,14 +61,15 @@ void ViewMap::printMap(MyMap* map)
 
 void ViewMap::printSubMap(MyMap* subMap, int row, int col)
 {
-	putimage(StartX + col * ratio, StartY + row * ratio, &this->background);
-	for (int i = 0; i < this->map->getNumRows(); i++)
+	loadSubMapPicture(subMap);
+	putimage(StartX + col * ratio, StartY + row * ratio, &this->subBackground);
+	for (int i = 0; i < subMap->getNumRows(); i++)
 	{
-		for (int j = 0; j < this->map->getNumCols(); j++)
+		for (int j = 0; j < subMap->getNumCols(); j++)
 		{
-			if (map->getElementType(row, col) != Prop::SUB_MAP)
+			if (subMap->getElementType(i, j) != Prop::SUB_MAP)
 				putimage(StartX + col * ratio + j * subRatio, StartY + row * ratio + i * subRatio,
-				         &this->subProps[map->getElementType(row, col)]);
+				         &this->subProps[subMap->getElementType(i, j)]);
 			else
 				putimage(StartX + col * ratio + j * subRatio, StartY + row * ratio + i * subRatio,
 				         &this->subProps[Prop::BOX]);
@@ -87,16 +94,6 @@ void ViewMap::quitView()
 {
 }
 
-
-void ViewMap::setCtrl(MapCtrl* ctrl)
-{
-	this->ctrl = ctrl;
-}
-
-MapCtrl* ViewMap::getCtrl()
-{
-	return this->ctrl;
-}
 
 MyMap* ViewMap::getMap()
 {
@@ -129,4 +126,9 @@ void ViewMap::backChange(MyChange* change)
 		else
 			printSubMap(change->initSubMap[i], change->row[i], change->col[i]);
 	}
+}
+
+void ViewMap::setMap(MyMap* map)
+{
+	this->map = map;
 }

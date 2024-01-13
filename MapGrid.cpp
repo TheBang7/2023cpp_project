@@ -1,6 +1,7 @@
 #include "MapGrid.h"
 #include "myMap.h"
 #include<iostream>
+
 MapGrid::MapGrid()
 {
 	this->type = 0;
@@ -19,5 +20,4 @@ void MapGrid::setType(int type)
 
 MapGrid::~MapGrid()
 {
-	
 }

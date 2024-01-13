@@ -3,10 +3,30 @@
 #include<stack>
 #include<string>
 #include <unordered_map>
+
 #include "MapGrid.h"
 #include "myChange.h"
 class MapGrid;
 class MyChange;
+
+enum Prop
+{
+	WALL,
+	FLOOR,
+	BOX_DEST,
+	BOX,
+	MAN,
+	EXTRA,
+	SUB_MAP,
+	HIT,
+	ALL
+};
+
+struct myPosition
+{
+	int row;
+	int col;
+};
 
 class MyMap
 {
@@ -24,6 +44,8 @@ public:
 	int getNumCols();
 	int getNumRows();
 	int getElementType(int x, int y);
+	MapGrid* getElement(int x, int y);
+	int getElementRemainsType(int x, int y);
 	int getManPositionRow();
 	int getManPositionCol();
 	void dealChange(MyChange* change);
@@ -37,15 +59,22 @@ public:
 	void setSubMap(int row, int col, MyMap* subMap);
 	std::string getSubMapNameToSet(int row, int col);
 	void setGridType(int row, int col, int type);
-	void setSubMapName(int row, int col, std::string );
+	void setSubMapName(int row, int col, std::string);
+	bool* entrance; //上下左右
+	myPosition* entrancePosition; //上下左右
+	bool getEntranceByMoveDirection(int rowChange, int colChange);
+	myPosition getEntrancePositionByMoveDirection(int rowChange, int colChange);
+	bool canMove(int const rowChange, int const colChange, int const initRow, int const initCol);
+
 
 private:
 	std::unordered_map<std::string, MyMap*> hashMap;
-	std::vector<MyMap*>mapList;
+	std::vector<MyMap*> mapList;
 	std::string mapName;
-	bool hasMapGrid=false;
-	void saveMap(std::string address, int countSub);
+	bool hasMapGrid = false;
+	void saveMap(std::ofstream& outFile, int countSub);
 	MapGrid** mapGrid; // 二维数组指针
+	MapGrid** mapGridRemains; // 二维数组指针
 	int numRows; // 地图行数
 	int numCols; // 地图列数
 	int size; //地图大小
@@ -54,17 +83,5 @@ private:
 	void generate();
 };
 
-enum Prop
-{
-	WALL,
-	FLOOR,
-	BOX_DEST,
-	BOX,
-	MAN,
-	EXTRA,
-	SUB_MAP,
-	HIT,
-	ALL
-};
 
 #endif

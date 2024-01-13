@@ -4,6 +4,8 @@
 #include<easyx.h>
 #include<graphics.h>
 #include <conio.h>
+
+#include "mapCtrl.h"
 constexpr char key_up = 'W';
 constexpr char key_down = 'S';
 constexpr char key_left = 'A';
@@ -48,7 +50,7 @@ int main(int argc, char* argv[])
 		{
 			std::cout << "Quit Game!" << std::endl;
 			ctrl->dealQuit();
-			map.saveMap("resource/map/" + map.getMapName()+".txt");
+			map.saveMap("resource/map/" + map.getMapName() + ".txt");
 			quit = true;
 		}
 

@@ -10,10 +10,18 @@
 
 MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * cols)
 {
+	entrance = new bool[4];
+	entrancePosition = new myPosition[4];
+	for (int i = 0; i < 3; i++)entrance[i] = false;
 	mapGrid = new MapGrid*[numRows];
 	for (int i = 0; i < numRows; ++i)
 	{
 		mapGrid[i] = new MapGrid[numCols];
+	}
+	mapGridRemains = new MapGrid*[numRows];
+	for (int i = 0; i < numRows; ++i)
+	{
+		mapGridRemains[i] = new MapGrid[numCols];
 	}
 	hasMapGrid = true;
 	generate();
@@ -21,6 +29,9 @@ MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * col
 
 MyMap::MyMap()
 {
+	entrance = new bool[4];
+	entrancePosition = new myPosition[4];
+	for (int i = 0; i < 3; i++)entrance[i] = false;
 	manPositionCol = 0;
 	manPositionRow = 0;
 
@@ -31,6 +42,11 @@ MyMap::MyMap()
 	for (int i = 0; i < numRows; ++i)
 	{
 		mapGrid[i] = new MapGrid[numCols];
+	}
+	mapGridRemains = new MapGrid*[numRows];
+	for (int i = 0; i < numRows; ++i)
+	{
+		mapGridRemains[i] = new MapGrid[numCols];
 	}
 	hasMapGrid = true;
 	// 初始化随机数生成器
@@ -48,6 +64,13 @@ MyMap::MyMap()
 				mapGrid[i][j].type = Prop::FLOOR;
 		}
 	}
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			mapGridRemains[i][j] = mapGrid[i][j];
+		}
+	}
 }
 
 int MyMap::getNumRows()
@@ -63,6 +86,16 @@ int MyMap::getNumCols()
 int MyMap::getElementType(int x, int y)
 {
 	return mapGrid[x][y].type;
+}
+
+MapGrid* MyMap::getElement(int x, int y)
+{
+	return &mapGrid[x][y];
+}
+
+int MyMap::getElementRemainsType(int x, int y)
+{
+	return mapGridRemains[x][y].type;
 }
 
 void MyMap::generate()
@@ -138,10 +171,19 @@ void MyMap::generate()
 	this->manPositionCol = col;
 	this->manPositionRow = row;
 	mapGrid[row][col].type = Prop::MAN;
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			mapGridRemains[i][j] = mapGrid[i][j];
+		}
+	}
 }
 
 MyMap::~MyMap()
 {
+	delete[]entrance;
+	delete[]entrancePosition;
 	for (int i = 0; i < numRows; ++i)
 	{
 		delete[] mapGrid[i];
@@ -168,6 +210,37 @@ void MyMap::printMap()
 		for (int j = 0; j < numCols; ++j)
 		{
 			switch (mapGrid[i][j].type)
+			{
+			case WALL:
+				std::cout << "# ";
+				break;
+			case FLOOR:
+				std::cout << ". ";
+				break;
+			case BOX_DEST:
+				std::cout << "D ";
+				break;
+			case BOX:
+				std::cout << "B ";
+				break;
+			case MAN:
+				std::cout << "M ";
+				break;
+			case HIT:
+				std::cout << "X ";
+				break;
+			default:
+				std::cout << "? ";
+			}
+		}
+		std::cout << std::endl;
+	}
+	// 打印地图
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			switch (mapGridRemains[i][j].type)
 			{
 			case WALL:
 				std::cout << "# ";
@@ -233,167 +306,337 @@ MyMap* MyMap::getSubMap(int row, int col)
 	return mapGrid[row][col].map;
 }
 
-std::string MyMap::getMapName() {
+std::string MyMap::getMapName()
+{
 	return mapName;
 }
 
-void MyMap::setMapName(std::string name) {
+void MyMap::setMapName(std::string name)
+{
 	mapName = name;
 }
 
-void MyMap::saveMap(std::string address) {
-	saveMap(address, 0);
-	std::cout << "map saved!" << std::endl;
-}
-
-void MyMap::saveMap(std::string address,int countSub) {
+void MyMap::saveMap(std::string address)
+{
 	// 打开文件
 	std::ofstream outFile;
 	outFile.open(address);
 
 	// 如果打开失败，尝试创建文件
-	if (!outFile.is_open()) {
+	if (!outFile.is_open())
+	{
 		std::cerr << "无法打开文件" << address << "，尝试创建文件并保存地图" << std::endl;
 
 		// 创建文件
 		outFile.open(address, std::ofstream::out | std::ofstream::trunc);
 
 		// 再次检查是否成功
-		if (!outFile.is_open()) {
+		if (!outFile.is_open())
+		{
 			std::cerr << "无法创建文件" << address << "，保存地图失败" << std::endl;
 			return;
 		}
 	}
-	// 写入地图信息到文件
-	outFile << mapName << std::endl;
-	outFile << numRows << " " << numCols << std::endl;
-	for (int i = 0; i < numRows; ++i) {
-		for (int j = 0; j < numCols; ++j) {
-			if (mapGrid[i][j].type != Prop::SUB_MAP) {
-				outFile << mapGrid[i][j].type << " ";
-			}
-			else {
-				mapGrid[i][j].map->setMapName("Sub_Map_" + std::to_string(countSub));
-				outFile << mapGrid[i][j].map->getMapName() << " ";
-				countSub++;
-			}
-		}
-		outFile << std::endl;
-	}
-	for (int i = 0; i < numRows; ++i) {
-		for (int j = 0; j < numCols; ++j) {
-			if (mapGrid[i][j].type == Prop::SUB_MAP) {
-				mapGrid[i][j].map->saveMap(address, countSub);
-			}
-		
-		}
-	}
+	saveMap(outFile, 0);
+	std::cout << "map saved: " + address << std::endl;
 	// 关闭文件
 	outFile.close();
 }
 
-void MyMap::setGridType(int row, int col, int type) {
+void MyMap::saveMap(std::ofstream& outFile, int countSub)
+
+{
+	int t = countSub;
+
+	// 写入地图信息到文件
+	outFile << mapName << std::endl;
+	outFile << numRows << " " << numCols << std::endl;
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			if (mapGrid[i][j].type != Prop::SUB_MAP)
+			{
+				outFile << mapGrid[i][j].type << " ";
+			}
+			else
+			{
+				mapGrid[i][j].map->setMapName("Sub_Map_" + std::to_string(t));
+				outFile << mapGrid[i][j].map->getMapName() << " ";
+				t++;
+			}
+		}
+		outFile << std::endl;
+	}
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			outFile << mapGridRemains[i][j].type << " ";
+		}
+		outFile << std::endl;
+	}
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			if (mapGrid[i][j].type == Prop::SUB_MAP)
+			{
+				mapGrid[i][j].map->saveMap(outFile, t);
+			}
+		}
+	}
+}
+
+void MyMap::setGridType(int row, int col, int type)
+{
 	mapGrid[row][col].setType(type);
 }
 
-void MyMap::setSubMapName(int row, int col, std::string name){
-	mapGrid[row][col].subMapName=name;
+void MyMap::setSubMapName(int row, int col, std::string name)
+{
+	mapGrid[row][col].subMapName = name;
 }
-void MyMap::loadMap(std::string address) {
+
+void MyMap::loadMap(std::string address)
+{
 	// 打开文件
 	std::ifstream inFile(address);
 
-	if (!inFile.is_open()) {
+	if (!inFile.is_open())
+	{
 		std::cerr << "无法打开文件" << address << "来加载地图" << std::endl;
 		return;
 	}
-	if (hasMapGrid) {
-			for (int i = 0; i < numRows; ++i)
+	if (hasMapGrid)
 	{
-		delete[] mapGrid[i];
-	}
-	delete[] mapGrid;
+		for (int i = 0; i < numRows; ++i)
+		{
+			delete[] mapGrid[i];
+		}
+		delete[] mapGrid;
 	}
 	int rows, cols;
-	std::string name,mainName;
+	std::string name, mainName;
 	// 读取地图信息
 	bool flag = true;
-	while (inFile >> name) {
+	while (inFile >> name)
+	{
 		inFile >> rows >> cols;
-
 		MyMap* mapPtr;
-		if (flag) {
+		if (flag)
+		{
 			mapPtr = this;
 			numRows = rows;
 			numCols = cols;
-			mapGrid = new MapGrid * [numRows];
+			for (int i = 0; i < 3; i++)entrance[i] = false;
+			mapGrid = new MapGrid*[numRows];
 			for (int i = 0; i < this->numRows; ++i)
 			{
 				mapGrid[i] = new MapGrid[numCols];
 			}
+			mapGridRemains = new MapGrid*[numRows];
+			for (int i = 0; i < this->numRows; ++i)
+			{
+				mapGridRemains[i] = new MapGrid[numCols];
+			}
+
 			flag = false;
 		}
-		else {
+		else
+		{
 			mapPtr = new MyMap(rows, cols);
 			mapList.push_back(mapPtr);
 			std::cout << mapPtr->getNumRows() << "   " << mapPtr->getNumCols() << std::endl;
 		}
 		mapPtr->setMapName(name);
 
-		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < cols; ++j) {
+		for (int i = 0; i < rows; ++i)
+		{
+			for (int j = 0; j < cols; ++j)
+			{
 				std::string type;
 				inFile >> type;
-				if (type.compare(0, 8, "Sub_Map_") == 0) {
+				if (type.compare(0, 8, "Sub_Map_") == 0)
+				{
 					// 执行相应的操作
-					mapPtr->setGridType(i,j,Prop::SUB_MAP);
-					mapPtr->setSubMapName(i,j,type);
+					mapPtr->setGridType(i, j, Prop::SUB_MAP);
+					mapPtr->setSubMapName(i, j, type);
 				}
-				else {
+				else
+				{
 					int typeValue = std::stoi(type);
-					if (typeValue >= Prop::ALL) {
+					if (typeValue >= Prop::ALL)
+					{
 						throw std::out_of_range("Invalid Map File: MapGrid ERROR !");
 					}
-					else if (typeValue == Prop::MAN) {
+					else if (typeValue == Prop::MAN)
+					{
 						mapPtr->manPositionCol = j;
 						mapPtr->manPositionRow = i;
 					}
 					mapPtr->setGridType(i, j, typeValue);
-				
+					if (((i == 0 || i == numRows - 1) && (j != 0 && j != numCols - 1) ||
+							(i != 0 && i != numRows - 1) && (j == 0 || j == numCols - 1))
+						&& typeValue == Prop::FLOOR)
+					{
+						if (i == 0)
+						{
+							if (mapPtr->entrance[0]) // 如果已经为true，抛出异常
+							{
+								throw std::runtime_error("Map Entrance ERROR!");
+							}
+							mapPtr->entrance[0] = true;
+							mapPtr->entrancePosition[0].row = i;
+							mapPtr->entrancePosition[0].col = j;
+						}
+						else if (i == numRows - 1)
+						{
+							if (mapPtr->entrance[1]) // 如果已经为true，抛出异常
+							{
+								throw std::runtime_error("Map Entrance ERROR!");
+							}
+							mapPtr->entrance[1] = true;
+							mapPtr->entrancePosition[1].row = i;
+							mapPtr->entrancePosition[1].col = j;
+						}
+						else if (j == 0)
+						{
+							/**
+ * \brief 
+ * \param  
+ */
+
+							if (mapPtr->entrance[2]) // 如果已经为true，抛出异常
+							{
+								throw std::runtime_error("Map Entrance ERROR!");
+							}
+							mapPtr->entrance[2] = true;
+							mapPtr->entrancePosition[2].row = i;
+							mapPtr->entrancePosition[2].col = j;
+						}
+						else
+						{
+							if (mapPtr->entrance[3]) // 如果已经为true，抛出异常
+							{
+								throw std::runtime_error("Map Entrance ERROR!");
+							}
+							mapPtr->entrance[3] = true;
+							mapPtr->entrancePosition[3].row = i;
+							mapPtr->entrancePosition[3].col = j;
+						}
+					}
 				}
 			}
 		}
-		hashMap.insert({ mapPtr->getMapName(),mapPtr});
+		for (int i = 0; i < rows; ++i)
+		{
+			for (int j = 0; j < cols; ++j)
+			{
+				std::string type;
+				inFile >> type;
+
+				int typeValue = std::stoi(type);
+				if (typeValue >= Prop::ALL)
+				{
+					throw std::out_of_range("Invalid Map File: MapGrid ERROR !");
+				}
+				mapPtr->mapGridRemains[i][j].type = typeValue;
+			}
+		}
+		hashMap.insert({mapPtr->getMapName(), mapPtr});
 	}
 
-	for (auto it:hashMap) {
+
+	for (auto it : hashMap)
+	{
 		std::string mapName = it.first;
 		MyMap* mapPtr = it.second;
-		for(int i=0;i<mapPtr->getNumRows();i++)
-			for (int j = 0; j< mapPtr->getNumCols(); j++) {
-				if (mapPtr->getElementType(i, j) == Prop::SUB_MAP) {
-					if (hashMap.find(mapPtr->getSubMapNameToSet(i, j)) != hashMap.end()) {
+		for (int i = 0; i < mapPtr->getNumRows(); i++)
+			for (int j = 0; j < mapPtr->getNumCols(); j++)
+			{
+				if (mapPtr->getElementType(i, j) == Prop::SUB_MAP)
+				{
+					if (hashMap.find(mapPtr->getSubMapNameToSet(i, j)) != hashMap.end())
+					{
 						MyMap* t = hashMap.find(mapPtr->getSubMapNameToSet(i, j))->second;
-						std::cout << mapName << "  " << i << " "<<j<<"  " << t->getMapName() << std::endl;
-						mapPtr->setSubMap(i,j,t);
+						mapPtr->setSubMap(i, j, t);
 					}
-					else 					
+					else
 						throw std::out_of_range("Invalid Map File: SubMap ERROR !");
-
-
 				}
 			}
 	}
-
 
 
 	// 关闭文件
 	inFile.close();
 }
-void MyMap::setSubMap(int row, int col, MyMap* subMap) {
+
+void MyMap::setSubMap(int row, int col, MyMap* subMap)
+{
 	mapGrid[row][col].setMap(subMap);
 }
 
-std::string MyMap::getSubMapNameToSet(int row, int col) {
+std::string MyMap::getSubMapNameToSet(int row, int col)
+{
 	return mapGrid[row][col].subMapName;
+}
+
+bool MyMap::getEntranceByMoveDirection(int rowChange, int colChange)
+{
+	if (rowChange == 1 && colChange == 0)return entrance[0];
+	else if (rowChange == -1 && colChange == 0)return entrance[1];
+	else if (rowChange == 0 && colChange == 1)return entrance[2];
+	else if (rowChange == 0 && colChange == -1)return entrance[3];
+	return false;
+}
+
+myPosition MyMap::getEntrancePositionByMoveDirection(int rowChange, int colChange)
+{
+	if (rowChange == 1 && colChange == 0)return entrancePosition[0];
+	else if (rowChange == -1 && colChange == 0)return entrancePosition[1];
+	else if (rowChange == 0 && colChange == 1)return entrancePosition[2];
+	else return entrancePosition[3];
+}
+
+bool MyMap::canMove(int const rowChange, int const colChange, int const initRow, int const initCol)
+{
+	MyMap* myMap = this;
+	int count = 1;
+	int finalRow = initRow + rowChange;
+	int finalCol = initCol + colChange;
+	while (myMap->isInMap(finalRow, finalCol) &&
+		(myMap->getElementType(finalRow, finalCol) == Prop::BOX ||
+			myMap->getElementType(finalRow, finalCol) == Prop::HIT) ||
+		myMap->getElementType(finalRow, finalCol) == Prop::SUB_MAP)
+	{
+		count++;
+		finalCol += colChange;
+		finalRow += rowChange;
+	}
+	if (!myMap->isInMap(finalRow, finalCol) || myMap->getElementType(finalRow, finalCol) == Prop::WALL)
+	{
+		int backRow = finalRow;
+		int backCol = finalCol;
+		for (int i = 1; i <= count; i++)
+		{
+			if (myMap->getElementType(backRow, backCol) == Prop::SUB_MAP)
+			{
+				MyMap* subMap = myMap->getSubMap(backRow, backCol);
+				if (subMap->getEntranceByMoveDirection(rowChange, colChange))
+				{
+					myPosition position = subMap->getEntrancePositionByMoveDirection(rowChange, colChange);
+					if (subMap->canMove(rowChange, colChange, position.row, position.col))return true;
+				}
+			}
+			backCol -= colChange;
+			backRow -= rowChange;
+		}
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
