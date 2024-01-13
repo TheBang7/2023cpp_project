@@ -31,15 +31,9 @@ struct myPosition
 class MyMap
 {
 public:
-	// 构造函数，接受地图的行数和列数
 	MyMap(int rows, int cols);
-
 	MyMap();
-
-	// 析构函数，用于释放动态分配的内存
 	~MyMap();
-
-	// 示例方法，打印地图
 	void printMap();
 	int getNumCols();
 	int getNumRows();
@@ -62,6 +56,8 @@ public:
 	void setSubMapName(int row, int col, std::string);
 	bool* entrance; //上下左右
 	myPosition* entrancePosition; //上下左右
+	MyMap* outsideMap;
+	myPosition outsidePosition;
 	bool getEntranceByMoveDirection(int rowChange, int colChange);
 	myPosition getEntrancePositionByMoveDirection(int rowChange, int colChange);
 	bool canMove(int const rowChange, int const colChange, int const initRow, int const initCol);

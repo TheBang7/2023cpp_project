@@ -109,34 +109,57 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 		int backRow = finalRow;
 		int backCol = finalCol;
 		int tcount = count;
-		for (int i = 1; i <= count; i++)
+		if (!map->isInMap(finalRow, finalCol))
 		{
-			if (map->getElementType(backRow, backCol) == Prop::SUB_MAP)
-			{
-				MyMap* subMap = map->getSubMap(backRow, backCol);
-				if (subMap->getEntranceByMoveDirection(rowChange, colChange))
-				{
-					myPosition position = subMap->getEntrancePositionByMoveDirection(rowChange, colChange);
-					if (subMap->canMove(rowChange, colChange, position.row, position.col))
-					{
-						transMapMove(subMap, rowChange, colChange, position.row, position.col,
-						             map->getElement(backRow - rowChange, backCol - colChange), false);
-						if (map->getElementType(backRow - rowChange, backCol - colChange) == Prop::MAN)
-						{
-							std::cout << "2345" << std::endl;
-							setMap(subMap);
-						}
-
-						ownMapMove(map, rowChange, colChange, tcount - 1, initRow, initCol, firstGrid, dealingInitMap);
-					}
-					break;
-				}
-			}
 			backCol -= colChange;
 			backRow -= rowChange;
 			tcount--;
+			if (map->getEntranceByMoveDirection(rowChange, colChange))
+			{
+				myPosition position = map->outsidePosition;
+				transMapMove(map->outsideMap, rowChange, colChange, position.row + rowChange, position.col + colChange,
+				             map->getElement(backRow, backCol), false);
+				if (map->getElementType(backRow, backCol) == Prop::MAN)
+				{
+					setMap(map->outsideMap);
+				}
+				ownMapMove(map, rowChange, colChange, tcount, initRow, initCol, firstGrid, true);
+				viewMap->begin();
+			}
 		}
-		dealingInitMap = true;
+		else
+		{
+			for (int i = 1; i <= count; i++)
+			{
+				backCol -= colChange;
+				backRow -= rowChange;
+				tcount--;
+				if (map->getElementType(backRow, backCol) == Prop::SUB_MAP)
+				{
+					MyMap* subMap = map->getSubMap(backRow, backCol);
+					if (subMap->getEntranceByMoveDirection(rowChange, colChange))
+					{
+						myPosition position = subMap->getEntrancePositionByMoveDirection(rowChange, colChange);
+						if (subMap->canMove(rowChange, colChange, position.row, position.col))
+						{
+							subMap->outsidePosition.row = backRow;
+							subMap->outsidePosition.col = backCol;
+							transMapMove(subMap, rowChange, colChange, position.row, position.col,
+							             map->getElement(backRow - rowChange, backCol - colChange), false);
+							if (map->getElementType(backRow - rowChange, backCol - colChange) == Prop::MAN)
+							{
+								setMap(subMap);
+							}
+							ownMapMove(map, rowChange, colChange, tcount - 1, initRow, initCol, firstGrid,
+							           dealingInitMap);
+							viewMap->begin();
+						}
+						break;
+					}
+				}
+			}
+			dealingInitMap = true;
+		}
 	}
 	else
 	{
@@ -177,5 +200,5 @@ void MapCtrl::setMap(MyMap* map)
 {
 	this->myMap = map;
 	viewMap->setMap(map);
-	viewMap->begin();
+
 }

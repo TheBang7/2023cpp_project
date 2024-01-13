@@ -502,11 +502,6 @@ void MyMap::loadMap(std::string address)
 						}
 						else if (j == 0)
 						{
-							/**
- * \brief 
- * \param  
- */
-
 							if (mapPtr->entrance[2]) // 如果已经为true，抛出异常
 							{
 								throw std::runtime_error("Map Entrance ERROR!");
@@ -576,6 +571,9 @@ void MyMap::loadMap(std::string address)
 void MyMap::setSubMap(int row, int col, MyMap* subMap)
 {
 	mapGrid[row][col].setMap(subMap);
+	subMap->outsideMap = this;
+	subMap->outsidePosition.row = row;
+	subMap->outsidePosition.col = col;
 }
 
 std::string MyMap::getSubMapNameToSet(int row, int col)
