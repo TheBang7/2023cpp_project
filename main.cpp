@@ -4,7 +4,7 @@
 #include<easyx.h>
 #include<graphics.h>
 #include <conio.h>
-
+#include "viewmenu.h"
 #include "mapCtrl.h"
 constexpr char key_up = 'W';
 constexpr char key_down = 'S';
@@ -17,6 +17,9 @@ constexpr char key_back = 'Q';
 
 int main(int argc, char* argv[])
 {
+	int cen;
+	int room;
+	menu1(argc,argv,cen,room);
 	std::cout << "begin" << std::endl;
 	MyMap map(8, 8);
 	map.loadMap("resource/map/test1.txt");
@@ -26,6 +29,7 @@ int main(int argc, char* argv[])
 	ViewMap viewMap(&map);
 	MapCtrl ctr(&viewMap, infMap);
 	MapCtrl* ctrl = &ctr;
+	
 	ctrl->begin();
 	bool quit = false;
 	bool pause = false;
