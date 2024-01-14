@@ -14,6 +14,10 @@ public:
 	int all;
 	MyMap** initSubMap;
 	MyMap** finalSubMap;
+	MyMap** initFather;
+	MyMap** finalFather;
+	MyMap* initView;
+	MyMap* finalView;
 	~MyChange();
 };
 

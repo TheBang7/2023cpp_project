@@ -12,13 +12,25 @@ class MyChange;
 enum Prop
 {
 	WALL,
+	//0
 	FLOOR,
+	//1
 	BOX_DEST,
+	//2
 	BOX,
+	//3
 	MAN,
+	//4
+	MAN_DEST,
+	//5
 	EXTRA,
+	//6
 	SUB_MAP,
+	//7
 	HIT,
+	//8
+	MAN_HIT,
+	//9
 	ALL
 };
 
@@ -28,10 +40,17 @@ struct myPosition
 	int col;
 };
 
+struct moveInfo
+{
+	bool canMove = false;
+	bool shouldInf = false;
+};
+
 class MyMap
 {
 public:
 	MyMap(int rows, int cols);
+	MyMap(bool isInf);
 	MyMap();
 	~MyMap();
 	void printMap();
@@ -54,14 +73,23 @@ public:
 	std::string getSubMapNameToSet(int row, int col);
 	void setGridType(int row, int col, int type);
 	void setSubMapName(int row, int col, std::string);
-	bool* entrance; //上下左右
+	bool entrance[4]; //上下左右
 	myPosition* entrancePosition; //上下左右
 	MyMap* outsideMap;
 	myPosition outsidePosition;
-	bool getEntranceByMoveDirection(int rowChange, int colChange);
-	myPosition getEntrancePositionByMoveDirection(int rowChange, int colChange);
-	bool canMove(int const rowChange, int const colChange, int const initRow, int const initCol);
-
+	bool getEntranceByMoveDirection_in(int rowChange, int colChange);
+	bool getEntranceByMoveDirection_out(int rowChange, int colChange);
+	myPosition getEntrancePositionByMoveDirection_in(int rowChange, int colChange);
+	myPosition getEntrancePositionByMoveDirection_out(int rowChange, int colChange);
+	moveInfo canMove(int const rowChange, int const colChange, int const initRow, int const initCol, bool loop,
+	             int countInf);
+	bool loopMove(int const rowChange, int const colChange, int const initRow, int const initCol, bool loop,
+	              int countInf);
+	bool printed = false;
+	bool isInf = false;
+	bool shouldCheck = false;
+	bool checkMap();
+	bool checked = false;
 
 private:
 	std::unordered_map<std::string, MyMap*> hashMap;
@@ -77,6 +105,8 @@ private:
 	int manPositionRow; //小人在第几行
 	int manPositionCol; //小人在第几列
 	void generate();
+	bool checkMap(std::vector<MyMap*>& list);
+
 };
 
 

@@ -21,6 +21,8 @@ void ViewMap::init_picture()
 	loadimage(&(props[Prop::WALL]), "resource/wall.bmp", this->ratio, this->ratio, true);
 	loadimage(&(props[Prop::MAN]), "resource/man.bmp", this->ratio, this->ratio, true);
 	loadimage(&(props[Prop::HIT]), "resource/box_hit.bmp", this->ratio, this->ratio, true);
+	loadimage(&(props[Prop::MAN_DEST]), "resource/player_des.bmp", this->ratio, this->ratio, true);
+	loadimage(&(props[Prop::MAN_HIT]), "resource/player_hit.bmp", this->ratio, this->ratio, true);
 }
 
 void ViewMap::loadSubMapPicture(MyMap* subMap)
@@ -33,11 +35,12 @@ void ViewMap::loadSubMapPicture(MyMap* subMap)
 	loadimage(&(subProps[Prop::WALL]), "resource/wall.bmp", this->subRatio, this->subRatio, true);
 	loadimage(&(subProps[Prop::MAN]), "resource/man.bmp", this->subRatio, this->subRatio, true);
 	loadimage(&(subProps[Prop::HIT]), "resource/box_hit.bmp", this->subRatio, this->subRatio, true);
+	loadimage(&(subProps[Prop::MAN_DEST]), "resource/player_des.bmp", this->subRatio, this->subRatio, true);
+	loadimage(&(subProps[Prop::MAN_HIT]), "resource/player_hit.bmp", this->subRatio, this->subRatio, true);
 }
 
 void ViewMap::begin()
 {
-
 	ratio = (ScreenHeight - 2 * StartY) / max(map->getNumCols(), map->getNumCols());
 	subRatio = ratio / max(map->getNumCols(), map->getNumCols());
 	StartX = (ScreenWidth - ratio * max(map->getNumCols(), map->getNumCols())) / 2;
@@ -115,16 +118,24 @@ void ViewMap::dealChange(MyChange* change)
 		else
 			printSubMap(change->finalSubMap[i], change->row[i], change->col[i]);
 	}
+	if (map->outsideMap == map)
+	{
+		printSubMap(map, map->outsidePosition.row, map->outsidePosition.col);
+	}
 }
 
 void ViewMap::backChange(MyChange* change)
 {
 	for (int i = 0; i < change->all; i++)
 	{
-		if (change->final[i] != Prop::SUB_MAP)
+		if (change->init[i] != Prop::SUB_MAP)
 			updatePropByChange(change->row[i], change->col[i], change->init[i]);
 		else
 			printSubMap(change->initSubMap[i], change->row[i], change->col[i]);
+	}
+	if (map->outsideMap == map)
+	{
+		printSubMap(map, map->outsidePosition.row, map->outsidePosition.col);
 	}
 }
 

@@ -9,6 +9,9 @@ MyChange::MyChange(int all)
 	this->final = new int[all];
 	this->initSubMap = new MyMap*[all];
 	this->finalSubMap = new MyMap*[all];
+	this->initFather = new MyMap*[all];
+	this->finalFather = new MyMap*[all];
+
 }
 
 MyChange::~MyChange()
@@ -19,4 +22,6 @@ MyChange::~MyChange()
 	delete[] this->final;
 	delete[] this->initSubMap;
 	delete[] this->finalSubMap;
+	delete[] this->initFather;
+	delete[] this->finalFather;
 }

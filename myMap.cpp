@@ -10,9 +10,8 @@
 
 MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * cols)
 {
-	entrance = new bool[4];
 	entrancePosition = new myPosition[4];
-	for (int i = 0; i < 3; i++)entrance[i] = false;
+	for (int i = 0; i <= 3; i++)entrance[i] = false;
 	mapGrid = new MapGrid*[numRows];
 	for (int i = 0; i < numRows; ++i)
 	{
@@ -29,9 +28,8 @@ MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * col
 
 MyMap::MyMap()
 {
-	entrance = new bool[4];
 	entrancePosition = new myPosition[4];
-	for (int i = 0; i < 3; i++)entrance[i] = false;
+	for (int i = 0; i <= 3; i++)entrance[i] = false;
 	manPositionCol = 0;
 	manPositionRow = 0;
 
@@ -72,6 +70,59 @@ MyMap::MyMap()
 		}
 	}
 }
+
+MyMap::MyMap(bool isInf)
+{
+	this->isInf = true;
+	if (isInf)
+	{
+		entrancePosition = new myPosition[4];
+		for (int i = 0; i <= 3; i++)entrance[i] = true;
+		manPositionCol = 0;
+		manPositionRow = 0;
+
+		numCols = 5;
+		numRows = 5;
+		size = 25;
+		mapGrid = new MapGrid*[numRows];
+		for (int i = 0; i < numRows; ++i)
+		{
+			mapGrid[i] = new MapGrid[numCols];
+		}
+		mapGridRemains = new MapGrid*[numRows];
+		for (int i = 0; i < numRows; ++i)
+		{
+			mapGridRemains[i] = new MapGrid[numCols];
+		}
+		hasMapGrid = true;
+
+
+		for (int i = 0; i < numRows; ++i)
+		{
+			for (int j = 0; j < numCols; ++j)
+			{
+				mapGrid[i][j].type = Prop::FLOOR;
+			}
+		}
+		for (int i = 0; i < numRows; ++i)
+		{
+			for (int j = 0; j < numCols; ++j)
+			{
+				mapGridRemains[i][j] = mapGrid[i][j];
+			}
+		}
+		entrancePosition[0].row = 0;
+		entrancePosition[0].col = 2;
+		entrancePosition[1].row = 4;
+		entrancePosition[1].col = 2;
+		entrancePosition[2].row = 2;
+		entrancePosition[2].col = 0;
+		entrancePosition[3].row = 2;
+		entrancePosition[3].col = 4;
+	}
+	else MyMap();
+}
+
 
 int MyMap::getNumRows()
 {
@@ -182,7 +233,6 @@ void MyMap::generate()
 
 MyMap::~MyMap()
 {
-	delete[]entrance;
 	delete[]entrancePosition;
 	for (int i = 0; i < numRows; ++i)
 	{
@@ -221,43 +271,21 @@ void MyMap::printMap()
 				std::cout << "D ";
 				break;
 			case BOX:
-				std::cout << "B ";
+				std::cout << "O ";
 				break;
 			case MAN:
-				std::cout << "M ";
+				std::cout << "P ";
+				break;
+			case MAN_DEST:
+				std::cout << "= ";
+				break;
+			case MAN_HIT:
+				std::cout << "p ";
 				break;
 			case HIT:
-				std::cout << "X ";
+				std::cout << "o";
 				break;
-			default:
-				std::cout << "? ";
-			}
-		}
-		std::cout << std::endl;
-	}
-	// 打印地图
-	for (int i = 0; i < numRows; ++i)
-	{
-		for (int j = 0; j < numCols; ++j)
-		{
-			switch (mapGridRemains[i][j].type)
-			{
-			case WALL:
-				std::cout << "# ";
-				break;
-			case FLOOR:
-				std::cout << ". ";
-				break;
-			case BOX_DEST:
-				std::cout << "D ";
-				break;
-			case BOX:
-				std::cout << "B ";
-				break;
-			case MAN:
-				std::cout << "M ";
-				break;
-			case HIT:
+			case SUB_MAP:
 				std::cout << "X ";
 				break;
 			default:
@@ -274,10 +302,20 @@ void MyMap::dealChange(MyChange* change)
 	{
 		mapGrid[change->row[i]][change->col[i]].type = change->final[i];
 		mapGrid[change->row[i]][change->col[i]].map = change->finalSubMap[i];
-		if (change->final[i] == Prop::MAN)
+		if (change->final[i] == Prop::SUB_MAP)
+		{
+			change->finalSubMap[i]->outsidePosition.row = change->row[i];
+			change->finalSubMap[i]->outsidePosition.col = change->col[i];
+			change->finalSubMap[i]->outsideMap = change->finalFather[i];
+		}
+		if (change->final[i] == Prop::MAN || change->final[i] == Prop::MAN_HIT)
 		{
 			manPositionCol = change->col[i];
 			manPositionRow = change->row[i];
+			if (change->final[i] == Prop::MAN_HIT)
+			{
+				shouldCheck = true;
+			}
 		}
 	}
 }
@@ -288,7 +326,13 @@ void MyMap::backChange(MyChange* change)
 	{
 		mapGrid[change->row[i]][change->col[i]].type = change->init[i];
 		mapGrid[change->row[i]][change->col[i]].map = change->initSubMap[i];
-		if (change->init[i] == Prop::MAN)
+		if (change->init[i] == Prop::SUB_MAP)
+		{
+			change->initSubMap[i]->outsidePosition.row = change->row[i];
+			change->initSubMap[i]->outsidePosition.col = change->col[i];
+			change->initSubMap[i]->outsideMap = change->initFather[i];
+		}
+		if (change->init[i] == Prop::MAN || change->init[i] == Prop::MAN_HIT)
 		{
 			manPositionCol = change->col[i];
 			manPositionRow = change->row[i];
@@ -347,6 +391,7 @@ void MyMap::saveMap(std::ofstream& outFile, int countSub)
 
 {
 	int t = countSub;
+	this->printed = true;
 
 	// 写入地图信息到文件
 	outFile << mapName << std::endl;
@@ -361,7 +406,6 @@ void MyMap::saveMap(std::ofstream& outFile, int countSub)
 			}
 			else
 			{
-				mapGrid[i][j].map->setMapName("Sub_Map_" + std::to_string(t));
 				outFile << mapGrid[i][j].map->getMapName() << " ";
 				t++;
 			}
@@ -380,7 +424,7 @@ void MyMap::saveMap(std::ofstream& outFile, int countSub)
 	{
 		for (int j = 0; j < numCols; ++j)
 		{
-			if (mapGrid[i][j].type == Prop::SUB_MAP)
+			if (mapGrid[i][j].type == Prop::SUB_MAP && !mapGrid[i][j].map->printed)
 			{
 				mapGrid[i][j].map->saveMap(outFile, t);
 			}
@@ -429,7 +473,7 @@ void MyMap::loadMap(std::string address)
 			mapPtr = this;
 			numRows = rows;
 			numCols = cols;
-			for (int i = 0; i < 3; i++)entrance[i] = false;
+			for (int i = 0; i <= 3; i++)entrance[i] = false;
 			mapGrid = new MapGrid*[numRows];
 			for (int i = 0; i < this->numRows; ++i)
 			{
@@ -457,9 +501,17 @@ void MyMap::loadMap(std::string address)
 			{
 				std::string type;
 				inFile >> type;
-				if (type.compare(0, 8, "Sub_Map_") == 0)
+				bool isSingleDigit = true;
+				for (char ch : type)
 				{
-					// 执行相应的操作
+					if (!std::isdigit(ch))
+					{
+						isSingleDigit = false;
+						break;
+					}
+				}
+				if (!isSingleDigit)
+				{
 					mapPtr->setGridType(i, j, Prop::SUB_MAP);
 					mapPtr->setSubMapName(i, j, type);
 				}
@@ -478,44 +530,28 @@ void MyMap::loadMap(std::string address)
 					mapPtr->setGridType(i, j, typeValue);
 					if (((i == 0 || i == numRows - 1) && (j != 0 && j != numCols - 1) ||
 							(i != 0 && i != numRows - 1) && (j == 0 || j == numCols - 1))
-						&& typeValue == Prop::FLOOR)
+						&& typeValue != Prop::WALL)
 					{
 						if (i == 0)
 						{
-							if (mapPtr->entrance[0]) // 如果已经为true，抛出异常
-							{
-								throw std::runtime_error("Map Entrance ERROR!");
-							}
 							mapPtr->entrance[0] = true;
 							mapPtr->entrancePosition[0].row = i;
 							mapPtr->entrancePosition[0].col = j;
 						}
 						else if (i == numRows - 1)
 						{
-							if (mapPtr->entrance[1]) // 如果已经为true，抛出异常
-							{
-								throw std::runtime_error("Map Entrance ERROR!");
-							}
 							mapPtr->entrance[1] = true;
 							mapPtr->entrancePosition[1].row = i;
 							mapPtr->entrancePosition[1].col = j;
 						}
 						else if (j == 0)
 						{
-							if (mapPtr->entrance[2]) // 如果已经为true，抛出异常
-							{
-								throw std::runtime_error("Map Entrance ERROR!");
-							}
 							mapPtr->entrance[2] = true;
 							mapPtr->entrancePosition[2].row = i;
 							mapPtr->entrancePosition[2].col = j;
 						}
-						else
+						else if (j == numCols - 1)
 						{
-							if (mapPtr->entrance[3]) // 如果已经为true，抛出异常
-							{
-								throw std::runtime_error("Map Entrance ERROR!");
-							}
 							mapPtr->entrance[3] = true;
 							mapPtr->entrancePosition[3].row = i;
 							mapPtr->entrancePosition[3].col = j;
@@ -581,7 +617,16 @@ std::string MyMap::getSubMapNameToSet(int row, int col)
 	return mapGrid[row][col].subMapName;
 }
 
-bool MyMap::getEntranceByMoveDirection(int rowChange, int colChange)
+bool MyMap::getEntranceByMoveDirection_out(int rowChange, int colChange)
+{
+	if (rowChange == 1 && colChange == 0)return entrance[0];
+	else if (rowChange == -1 && colChange == 0)return entrance[1];
+	else if (rowChange == 0 && colChange == -1)return entrance[2];
+	else if (rowChange == 0 && colChange == 1)return entrance[3];
+	return false;
+}
+
+bool MyMap::getEntranceByMoveDirection_in(int rowChange, int colChange)
 {
 	if (rowChange == 1 && colChange == 0)return entrance[0];
 	else if (rowChange == -1 && colChange == 0)return entrance[1];
@@ -590,7 +635,15 @@ bool MyMap::getEntranceByMoveDirection(int rowChange, int colChange)
 	return false;
 }
 
-myPosition MyMap::getEntrancePositionByMoveDirection(int rowChange, int colChange)
+myPosition MyMap::getEntrancePositionByMoveDirection_out(int rowChange, int colChange)
+{
+	if (rowChange == 1 && colChange == 0)return entrancePosition[0];
+	else if (rowChange == -1 && colChange == 0)return entrancePosition[1];
+	else if (rowChange == 0 && colChange == -1)return entrancePosition[2];
+	else return entrancePosition[3];
+}
+
+myPosition MyMap::getEntrancePositionByMoveDirection_in(int rowChange, int colChange)
 {
 	if (rowChange == 1 && colChange == 0)return entrancePosition[0];
 	else if (rowChange == -1 && colChange == 0)return entrancePosition[1];
@@ -598,17 +651,127 @@ myPosition MyMap::getEntrancePositionByMoveDirection(int rowChange, int colChang
 	else return entrancePosition[3];
 }
 
-bool MyMap::canMove(int const rowChange, int const colChange, int const initRow, int const initCol)
+moveInfo MyMap::canMove(int const rowChange, int const colChange, int const initRow, int const initCol,
+                        bool loop = false,
+                        int countInf = 0)
 {
+	moveInfo info;
+	if (countInf >= 10)
+	{
+		info.canMove = false;
+		info.shouldInf = true;
+		return info;
+	}
+	else
+	{
+		bool flag = false;
+		MyMap* myMap = this;
+		int count = 0;
+		int finalRow = initRow;
+		int finalCol = initCol;
+		while (myMap->isInMap(finalRow, finalCol) &&
+			(myMap->getElementType(finalRow, finalCol) == Prop::BOX ||
+				myMap->getElementType(finalRow, finalCol) == Prop::MAN ||
+				myMap->getElementType(finalRow, finalCol) == Prop::MAN_HIT ||
+				myMap->getElementType(finalRow, finalCol) == Prop::HIT ||
+				myMap->getElementType(finalRow, finalCol) == Prop::SUB_MAP))
+		{
+			if (myMap->getElementType(finalRow, finalCol) == Prop::MAN)
+			{
+				if (loop)info.canMove = true;
+				return info;
+				flag = true;
+			} //连续两次碰到人所在的位置，代表路径为环
+			count++;
+			finalCol += colChange;
+			finalRow += rowChange;
+		}
+		if (!myMap->isInMap(finalRow, finalCol) || myMap->getElementType(finalRow, finalCol) == Prop::WALL)
+		{
+			int backRow = finalRow;
+			int backCol = finalCol;
+
+			if (!myMap->isInMap(finalRow, finalCol))
+			{
+				backCol -= colChange;
+				backRow -= rowChange;
+				if (myMap->getEntranceByMoveDirection_out(rowChange, colChange))
+				{
+					myPosition position = myMap->outsidePosition;
+					moveInfo tinfo = outsideMap->canMove(rowChange, colChange, position.row + colChange,
+					                                     position.col + colChange,
+					                                     flag, countInf + 1);
+					if (tinfo.canMove)
+					{
+						info.canMove = true;
+						return info;
+					}
+					else if (tinfo.shouldInf)
+					{
+						info.shouldInf = true;
+						return info;
+					}
+				}
+			}
+			else
+			{
+				for (int i = 1; i <= count; i++)
+				{
+					if (myMap->getElementType(backRow, backCol) == Prop::SUB_MAP)
+					{
+						MyMap* subMap = myMap->getSubMap(backRow, backCol);
+						if (subMap->getEntranceByMoveDirection_in(rowChange, colChange))
+						{
+							myPosition position = subMap->getEntrancePositionByMoveDirection_in(rowChange, colChange);
+							moveInfo tinfo = subMap->canMove(rowChange, colChange, position.row, position.col, flag,
+							                                 countInf + 1);
+							if (tinfo.canMove)
+							{
+								info.canMove = true;
+								return info;
+							}
+							else if (tinfo.shouldInf)
+							{
+								info.shouldInf = true;
+								return info;
+							}
+						}
+					}
+					backCol -= colChange;
+					backRow -= rowChange;
+				}
+			}
+			return info;
+		}
+		else
+		{
+			info.canMove = true;
+			return info;
+		}
+	}
+}
+
+
+bool MyMap::loopMove(int const rowChange, int const colChange, int const initRow, int const initCol, bool loop = false,
+                     int countInf = 0)
+{
+	if (countInf >= 10 || !canMove(rowChange, colChange, initRow, initCol).canMove)return false;
+	bool flag = false;
 	MyMap* myMap = this;
-	int count = 1;
-	int finalRow = initRow + rowChange;
-	int finalCol = initCol + colChange;
+	int count = 0;
+	int finalRow = initRow;
+	int finalCol = initCol;
 	while (myMap->isInMap(finalRow, finalCol) &&
 		(myMap->getElementType(finalRow, finalCol) == Prop::BOX ||
-			myMap->getElementType(finalRow, finalCol) == Prop::HIT) ||
-		myMap->getElementType(finalRow, finalCol) == Prop::SUB_MAP)
+			myMap->getElementType(finalRow, finalCol) == Prop::MAN ||
+			myMap->getElementType(finalRow, finalCol) == Prop::HIT ||
+			myMap->getElementType(finalRow, finalCol) == Prop::SUB_MAP))
 	{
+		if (myMap->getElementType(finalRow, finalCol) == Prop::MAN)
+		{
+			if (loop)return true;
+			flag = true;
+		} //连续两次碰到人所在的位置，代表路径为环
 		count++;
 		finalCol += colChange;
 		finalRow += rowChange;
@@ -617,24 +780,74 @@ bool MyMap::canMove(int const rowChange, int const colChange, int const initRow,
 	{
 		int backRow = finalRow;
 		int backCol = finalCol;
-		for (int i = 1; i <= count; i++)
+
+		if (!myMap->isInMap(finalRow, finalCol))
 		{
-			if (myMap->getElementType(backRow, backCol) == Prop::SUB_MAP)
+			if (myMap->getEntranceByMoveDirection_out(rowChange, colChange))
 			{
-				MyMap* subMap = myMap->getSubMap(backRow, backCol);
-				if (subMap->getEntranceByMoveDirection(rowChange, colChange))
+				myPosition position = myMap->outsidePosition;
+				if (outsideMap->loopMove(rowChange, colChange, position.row + rowChange, position.col + colChange,
+				                         flag, countInf + 1))
 				{
-					myPosition position = subMap->getEntrancePositionByMoveDirection(rowChange, colChange);
-					if (subMap->canMove(rowChange, colChange, position.row, position.col))return true;
+					return true;
 				}
 			}
-			backCol -= colChange;
-			backRow -= rowChange;
+		}
+		else
+		{
+			for (int i = 1; i <= count; i++)
+			{
+				backCol -= colChange;
+				backRow -= rowChange;
+				if (myMap->getElementType(backRow, backCol) == Prop::SUB_MAP)
+				{
+					MyMap* subMap = myMap->getSubMap(backRow, backCol);
+					if (subMap->getEntranceByMoveDirection_in(rowChange, colChange))
+					{
+						myPosition position = subMap->getEntrancePositionByMoveDirection_in(rowChange, colChange);
+						if (subMap->loopMove(rowChange, colChange, position.row, position.col, flag, countInf + 1))
+						{
+							return true;
+						}
+					}
+				}
+			}
 		}
 		return false;
 	}
 	else
 	{
-		return true;
+		return false;
 	}
+}
+bool MyMap::checkMap()
+{
+	std::vector<MyMap*> list;
+	bool flag = checkMap(list);
+	for (auto t : list)
+		t->checked = false;
+	return flag;
+}
+
+bool MyMap::checkMap(std::vector<MyMap*>& list)
+{
+	this->checked = true;
+	list.push_back(this);
+	for (int i = 0; i < numRows; i++)
+	{
+		for (int j = 0; j < numCols; j++)
+		{
+			if (mapGrid[i][j].type == Prop::BOX_DEST) return false;
+			if (mapGrid[i][j].type == Prop::SUB_MAP)
+			{
+				if(!mapGrid[i][j].map->checked)
+				{
+					bool flag = mapGrid[i][j].map->checkMap(list);
+					if (!flag) return false;
+				}
+
+			}
+		}
+	}
+	return true;
 }
