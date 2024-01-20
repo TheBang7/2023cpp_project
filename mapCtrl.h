@@ -43,6 +43,7 @@ public:
 	MyMap* getMap();
 	MyMap* infMap;
 	MyMap* initMap;
+	bool isTraining=false;
 
 private:
 

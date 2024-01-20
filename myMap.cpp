@@ -10,6 +10,11 @@
 
 MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * cols)
 {
+	manPositionCol = 0;
+	manPositionRow = 0;
+	outsideMap = nullptr;
+	outsidePosition.row = 0;
+	outsidePosition.col = 0;
 	entrancePosition = new myPosition[4];
 	for (int i = 0; i <= 3; i++)entrance[i] = false;
 	mapGrid = new MapGrid*[numRows];

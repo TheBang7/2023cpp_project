@@ -6,6 +6,8 @@
 
 ViewMap::ViewMap(MyMap* map)
 {
+	ratio = 100;
+	subRatio = 50;
 	this->map = map;
 	props = new IMAGE[Prop::ALL];
 	subProps = new IMAGE[Prop::ALL];

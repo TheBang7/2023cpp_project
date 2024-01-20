@@ -24,6 +24,8 @@ MapCtrl::~MapCtrl()
 	{
 		// 循环弹出栈中的所有元素
 		backStack.pop();
+		backIdStack.pop();
+		backMapStack.pop();
 	}
 }
 
@@ -144,7 +146,7 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 			pause = !pause;
 		}
 
-		Sleep(200);
+		Sleep(100);
 	}
 }
 
