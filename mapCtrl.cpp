@@ -4,12 +4,15 @@
 #include <graphics.h>
 #include <conio.h>
 #include <iostream>
+#include <sstream>
+#include "viewmenu.h"
 
 
 MapCtrl::MapCtrl(ViewMap* viewMap, MyMap* infMap)
 {
 	this->viewMap = viewMap;
 	this->myMap = viewMap->getMap();
+	this->mainMap = viewMap->getMap();
 	this->initMap = viewMap->getMap();
 	manAreaBefore = Prop::FLOOR;
 	this->infMap = infMap;
@@ -25,14 +28,129 @@ MapCtrl::~MapCtrl()
 }
 
 
-void MapCtrl::begin()
+void MapCtrl::begin(int& cen,int&room,int& ifload)
 {
-	bool quit = false;
 	viewMap->begin();
+	bool quit = false;
+	bool pause = false;
+	MapCtrl* ctrl = this;
+	MyMap* map = this->myMap;
+
+	// 添加菜单按钮
+	int x = 50, y = 100; // 将 y 坐标上移
+	int w = 100, h = 60; // 增大按钮的宽度和高度
+	TCHAR text[20] = "save";
+	drawButton(x, y, w, h, text, WHITE);
+	y += 70; // 更新 y 坐标
+	TCHAR textMenu[20] = "load";
+	drawButton(x, y, w, h, textMenu, WHITE);
+
+	
+	while (!quit)
+	{
+
+		if (GetAsyncKeyState(0x49) & 0x8000)
+		{
+			choosesave(mainMap, cen, room);
+			break;
+		}
+
+		if (GetAsyncKeyState(0x4F) & 0x8000)
+		{
+			// 'o' 键被按下
+			chooseload(mainMap, cen, room);
+			ifload = 1;
+			break;
+		}
+
+
+
+
+		if (GetAsyncKeyState(key_up) & 0x8001 && !pause)
+		{
+			std::cout << "Move Up!" << std::endl;
+			bool flag = ctrl->dealUp();
+			if (flag)
+			{
+				std::cout << "Game over!" << std::endl;
+				quit = true;
+			}
+			ctrl->getMap()->printMap();
+		}
+		else if (GetAsyncKeyState(key_down) & 0x8001 && !pause)
+		{
+			std::cout << "Move Down!" << std::endl;
+			bool flag = ctrl->dealDown();
+			if (flag)
+			{
+				std::cout << "Game over!" << std::endl;
+				quit = true;
+			}
+			ctrl->getMap()->printMap();
+		}
+		else if (GetAsyncKeyState(key_left) & 0x8001 && !pause)
+		{
+			std::cout << "Move Left!" << std::endl;
+			bool flag = ctrl->dealLeft();
+			if (flag)
+			{
+				std::cout << "Game over!" << std::endl;
+				quit = true;
+			}
+			ctrl->getMap()->printMap();
+		}
+		else if (GetAsyncKeyState(key_right) & 0x8001 && !pause)
+		{
+			std::cout << "Move Right!" << std::endl;
+			bool flag = ctrl->dealRight();
+			if (flag)
+			{
+				std::cout << "Game over!" << std::endl;
+				quit = true;
+			}
+			ctrl->getMap()->printMap();
+		}
+		else if (GetAsyncKeyState(key_back) & 0x8001 && !pause)
+		{
+			std::cout << "Back One Step!" << std::endl;
+			ctrl->dealBack();
+			ctrl->getMap()->printMap();
+		}
+		else if (GetAsyncKeyState(key_quit) & 0x8001)
+		{
+			std::cout << "Quit Game!" << std::endl;
+			ctrl->dealQuit();
+			diyiceng(cen, cen, room);
+			map->saveMap("resource/map/" + map->getMapName() + ".txt");
+			quit = true;
+		}
+		else if (GetAsyncKeyState(key_restart) & 0x8001)
+		{
+			std::cout << "Restart Game!" << std::endl;
+			std::stringstream ss;
+			ss << "resource/map/" << cen << "." << room << ".txt";
+			std::string filename = ss.str();
+			map->loadMap(filename);
+			map->printMap();
+			map->setMapName("test3");
+			//ctrl->setMap(map);
+			ctrl->begin(cen,room,ifload);
+			MyMap* infMap = new MyMap(true);
+			delete ctrl->infMap;
+			ctrl->infMap = infMap;
+		}
+		else if (GetAsyncKeyState(key_pause) & 0x8001)
+		{
+			pause = !pause;
+		}
+
+		Sleep(200);
+	}
 }
 
 void MapCtrl::dealQuit()
 {
+
 }
 
 
