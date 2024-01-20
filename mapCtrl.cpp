@@ -113,6 +113,7 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 		{
 			std::cout << "Quit Game!" << std::endl;
 			ctrl->dealQuit();
+			Sleep(200);
 			//map->saveMap("resource/map/" + map->getMapName() + ".txt");
 			break;
 		}

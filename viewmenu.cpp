@@ -552,7 +552,7 @@ void shezhi(int& cen, int& room) {
     outtextxy(950, 150, volumeText);
     MOUSEMSG m; // 定义鼠标消息
     while (true) {
-        if (GetAsyncKeyState(key_pause) & 0x8001)
+        if (GetAsyncKeyState(key_quit) & 0x8001)
         {
             menu1(cen, room);
             break;
