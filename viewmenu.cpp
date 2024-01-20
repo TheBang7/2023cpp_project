@@ -214,8 +214,8 @@ void chooseload(MyMap map, int& cen, int& room) {
                 // 如果鼠标点击的位置在 "开始游戏" 按钮的范围内
 
                 ss = "存档/" + std::to_string(cen) + "." + std::to_string(room) + "/1.txt";
-                std::string filename = ss;
-                map.loadMap(ss);
+                std::string filename = "resource/map/1.2.txt";
+                map.loadMap(filename);
                 flag = 0;
                 break;
 
@@ -272,6 +272,10 @@ void chooseCeng(int& cen, int& room) {
     TCHAR textExit[20] = "第三层地牢";
     drawButton(x, y, w, h, textExit, WHITE);
 
+    y += 70; // 更新 y 坐标
+    TCHAR textExit1[20] = "test";
+    drawButton(x, y, w, h, textExit1, WHITE);
+
 
     bool flag1 = 0;
     MOUSEMSG m;
@@ -288,45 +292,59 @@ void chooseCeng(int& cen, int& room) {
         case WM_MOUSEMOVE:
             if (m.x >= x && m.x <= x + w) {
                 if (m.y >= y && m.y <= y + h) {
-                    drawButton(x, y, w, h, textExit, RED);
+                    drawButton(x, y, w, h, textExit1, RED);
                 }
                 else {
-                    drawButton(x, y, w, h, textExit, WHITE);
+                    drawButton(x, y, w, h, textExit1, WHITE);
                 }
                 if (m.y >= y - 70 && m.y <= y - 70 + h) { // 更新 y 坐标检测范围
-                    drawButton(x, y - 70, w, h, textMenu, RED);
+                    drawButton(x, y - 70, w, h, textExit, RED);
                 }
                 else {
-                    drawButton(x, y - 70, w, h, textMenu, WHITE);
+                    drawButton(x, y - 70, w, h, textExit, WHITE);
                 }
                 if (m.y >= y - 140 && m.y <= y - 140 + h) { // 更新 y 坐标检测范围
-                    drawButton(x, y - 140, w, h, text, RED);
+                    drawButton(x, y - 140, w, h, textMenu, RED);
                 }
                 else {
-                    drawButton(x, y - 140, w, h, text, WHITE);
+                    drawButton(x, y - 140, w, h, textMenu, WHITE);
+                }
+                if (m.y >= y - 210 && m.y <= y - 210 + h) { // 更新 y 坐标检测范围
+                    drawButton(x, y - 210, w, h, text, RED);
+                }
+                else {
+                    drawButton(x, y - 210, w, h, text, WHITE);
                 }
             }
             break;
         case WM_LBUTTONDOWN: // 鼠标左键按下
-            if (m.x >= x && m.x <= x + w && m.y >= y - 140 && m.y <= y - 140 + h) {
+            if (m.x >= x && m.x <= x + w && m.y >= y - 210 && m.y <= y - 210 + h) {
                 // 如果鼠标点击的位置在 "开始游戏" 按钮的范围内
                 cleardevice();
                 flag1 = 1;
                 diyiceng(1, cen, room); // 调用 startGame 函数来显示下一个界面
 
             }
-            else if (m.x >= x && m.x <= x + w && m.y >= y - 70 && m.y <= y - 70 + h) {
+            if (m.x >= x && m.x <= x + w && m.y >= y - 140 && m.y <= y - 140 + h) {
                 // 如果鼠标点击的位置在 "开始游戏" 按钮的范围内
                 cleardevice();
                 flag1 = 1;
                 diyiceng(2, cen, room); // 调用 startGame 函数来显示下一个界面
+
             }
-            else if (m.x >= x && m.x <= x + w && m.y >= y && m.y <= y + h) {
+            else if (m.x >= x && m.x <= x + w && m.y >= y - 70 && m.y <= y - 70 + h) {
                 // 如果鼠标点击的位置在 "开始游戏" 按钮的范围内
                 cleardevice();
                 flag1 = 1;
                 diyiceng(3, cen, room); // 调用 startGame 函数来显示下一个界面
             }
+            else if (m.x >= x && m.x <= x + w && m.y >= y && m.y <= y + h) {
+                // 如果鼠标点击的位置在 "开始游戏" 按钮的范围内
+                cleardevice();
+                flag1 = 1;
+                diyiceng(4, cen, room); // 调用 startGame 函数来显示下一个界面
+            }
+
 
             break;
 
@@ -458,6 +476,8 @@ void shezhi(int& cen,int& room) {
     settextcolor(WHITE); // 将字体颜色设置为白色
 
     setbkmode(TRANSPARENT); // 设置背景模式为透明
+    outtextxy(250, 40, _T("I:save"));
+    outtextxy(250, 140, _T("O:load"));
     rectangle(950, 230, 1025, 290); // 加音量按钮
     outtextxy(975, 235, _T("+"));
     rectangle(1050, 230, 1125, 290); // 减音量按钮
@@ -487,7 +507,9 @@ void shezhi(int& cen,int& room) {
                 cleardevice(); // 清空当前的图形设备
                 putimage(0, 0, &background);
                 settextstyle(50, 0, _T("黑体")); // 设置字体大小和字体
-                setbkmode(TRANSPARENT); // 设置背景模式为透明
+                outtextxy(250, 40, _T("I:save"));
+                outtextxy(250, 140, _T("O:load"));
+                settextstyle(50, 0, _T("黑体")); // 设置字体大小和字体                setbkmode(TRANSPARENT); // 设置背景模式为透明
                 rectangle(950, 230, 1025, 290); // 加音量按钮
                 outtextxy(975, 235, _T("+"));
                 rectangle(1050, 230, 1125, 290); // 减音量按钮
@@ -504,6 +526,9 @@ void shezhi(int& cen,int& room) {
                 }
                 cleardevice(); // 清空当前的图形设备
                 putimage(0, 0, &background);
+                settextstyle(50, 0, _T("黑体")); // 设置字体大小和字体
+                outtextxy(250, 40, _T("I:save"));
+                outtextxy(250, 140, _T("O:load"));
                 settextstyle(50, 0, _T("黑体")); // 设置字体大小和字体
                 setbkmode(TRANSPARENT); // 设置背景模式为透明
                 rectangle(950, 230, 1025, 290); // 加音量按钮

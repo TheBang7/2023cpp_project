@@ -32,9 +32,6 @@ int main(int argc, char* argv[])
 		MapCtrl ctr(&viewMap, infMap);
 		MapCtrl* ctrl = &ctr;
 		ctrl->begin(cen,room,ifload);
-		if (ifload == 1) {
-			continue;
-		}
 		diyiceng(cen,cen, room);
 	}
 	
