@@ -472,7 +472,6 @@ void celebrate() {
     mciSendString(_T("open resource/success.wav alias music1"), NULL, 0, NULL);
 
     // 播放音乐
-    music1(2);
 
     mciSendString(_T("play music1"), NULL, 0, NULL);
     // 设置字体颜色为白色
@@ -519,6 +518,8 @@ void celebrate() {
         // 等待下一帧
         Sleep(sleepTime);
     }
+    mciSendString(_T("close music1"), NULL, 0, NULL);
+
 
     // 按任意键退出
     cleardevice();
