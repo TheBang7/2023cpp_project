@@ -138,7 +138,7 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 			break;
 		}
 
-		Sleep(100);
+		Sleep(200);
 	}
 }
 
