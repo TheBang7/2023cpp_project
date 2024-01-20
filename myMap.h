@@ -87,9 +87,10 @@ public:
 	              int countInf);
 	bool printed = false;
 	bool isInf = false;
-	bool shouldCheck = false;
+	bool shouldCheck =false;
 	bool checkMap();
 	bool checked = false;
+
 
 private:
 	std::unordered_map<std::string, MyMap*> hashMap;

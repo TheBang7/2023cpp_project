@@ -304,9 +304,12 @@ void MyMap::dealChange(MyChange* change)
 		mapGrid[change->row[i]][change->col[i]].map = change->finalSubMap[i];
 		if (change->final[i] == Prop::SUB_MAP)
 		{
-			change->finalSubMap[i]->outsidePosition.row = change->row[i];
-			change->finalSubMap[i]->outsidePosition.col = change->col[i];
-			change->finalSubMap[i]->outsideMap = change->finalFather[i];
+			if (change->finalSubMap[i]->outsideMap != change->finalFather[i] ||
+				(abs(change->finalSubMap[i]->outsidePosition.row - change->row[i]) + (abs(change->finalSubMap[i]->outsidePosition.col - change->col[i])) <= 1)) {
+				change->finalSubMap[i]->outsidePosition.row = change->row[i];
+				change->finalSubMap[i]->outsidePosition.col = change->col[i];
+				change->finalSubMap[i]->outsideMap = change->finalFather[i];
+			}
 		}
 		if (change->final[i] == Prop::MAN || change->final[i] == Prop::MAN_HIT)
 		{
@@ -499,6 +502,11 @@ void MyMap::loadMap(std::string address)
 			std::cout << mapPtr->getNumRows() << "   " << mapPtr->getNumCols() << std::endl;
 		}
 		mapPtr->setMapName(name);
+		std::vector<myPosition> top;
+		std::vector<myPosition> down;
+		std::vector<myPosition> left;
+		std::vector<myPosition> right;
+
 
 		for (int i = 0; i < rows; ++i)
 		{
@@ -533,38 +541,60 @@ void MyMap::loadMap(std::string address)
 						mapPtr->manPositionRow = i;
 					}
 					mapPtr->setGridType(i, j, typeValue);
-					if (((i == 0 || i == numRows - 1) && (j != 0 && j != numCols - 1) ||
-							(i != 0 && i != numRows - 1) && (j == 0 || j == numCols - 1))
+					if (((i == 0 || i == rows - 1) && (j != 0 && j !=cols - 1) ||
+							(i != 0 && i != rows - 1) && (j == 0 || j == cols - 1))
 						&& typeValue != Prop::WALL)
 					{
 						if (i == 0)
 						{
 							mapPtr->entrance[0] = true;
-							mapPtr->entrancePosition[0].row = i;
-							mapPtr->entrancePosition[0].col = j;
+							myPosition p;
+							p.row = i;
+							p.col = j;
+							top.push_back(p);
 						}
-						else if (i == numRows - 1)
+						else if (i == rows - 1)
 						{
 							mapPtr->entrance[1] = true;
-							mapPtr->entrancePosition[1].row = i;
-							mapPtr->entrancePosition[1].col = j;
+							myPosition p;
+							p.row = i;
+							p.col = j;
+							down.push_back(p);
 						}
 						else if (j == 0)
 						{
 							mapPtr->entrance[2] = true;
-							mapPtr->entrancePosition[2].row = i;
-							mapPtr->entrancePosition[2].col = j;
+							myPosition p;
+							p.row = i;
+							p.col = j;
+							left.push_back(p);
 						}
-						else if (j == numCols - 1)
+						else if (j == cols - 1)
 						{
 							mapPtr->entrance[3] = true;
-							mapPtr->entrancePosition[3].row = i;
-							mapPtr->entrancePosition[3].col = j;
+							myPosition p;
+							p.row = i;
+							p.col = j;
+							right.push_back(p);
 						}
 					}
 				}
 			}
 		}
+		for (int i = 0;i < 4;i++) {
+			if (mapPtr->entrance[i]) {
+				if(i==0)
+					mapPtr->entrancePosition[i] = top[top.size() / 2];
+				else if(i==1)
+					mapPtr->entrancePosition[i] = down[down.size() / 2];
+				else if (i == 2)
+					mapPtr->entrancePosition[i] = left[left.size() / 2];
+				else 
+					mapPtr->entrancePosition[i] = right[right.size() / 2];
+
+			}
+		}
+
 		for (int i = 0; i < rows; ++i)
 		{
 			for (int j = 0; j < cols; ++j)
@@ -672,7 +702,7 @@ moveInfo MyMap::canMove(int const rowChange, int const colChange, int const init
 	{
 		bool flag = false;
 		MyMap* myMap = this;
-		int count = 0;
+		int count = 1;
 		int finalRow = initRow;
 		int finalCol = initCol;
 		while (myMap->isInMap(finalRow, finalCol) &&
@@ -684,8 +714,10 @@ moveInfo MyMap::canMove(int const rowChange, int const colChange, int const init
 		{
 			if (myMap->getElementType(finalRow, finalCol) == Prop::MAN)
 			{
-				if (loop)info.canMove = true;
-				return info;
+				if (loop) {
+					info.canMove = true;
+					return info;
+				}
 				flag = true;
 			} //连续两次碰到人所在的位置，代表路径为环
 			count++;
