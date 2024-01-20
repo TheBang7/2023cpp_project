@@ -23,7 +23,7 @@ MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * col
 		mapGridRemains[i] = new MapGrid[numCols];
 	}
 	hasMapGrid = true;
-	generate();
+	//generate();
 }
 
 MyMap::MyMap()
@@ -460,6 +460,11 @@ void MyMap::loadMap(std::string address)
 		}
 		delete[] mapGrid;
 	}
+	for (MyMap* map : mapList) {
+		delete map;
+	}
+	mapList.clear();
+	hashMap.clear();
 	int rows, cols;
 	std::string name, mainName;
 	// 读取地图信息
@@ -600,6 +605,7 @@ void MyMap::loadMap(std::string address)
 	}
 
 
+
 	// 关闭文件
 	inFile.close();
 }
@@ -619,8 +625,8 @@ std::string MyMap::getSubMapNameToSet(int row, int col)
 
 bool MyMap::getEntranceByMoveDirection_out(int rowChange, int colChange)
 {
-	if (rowChange == 1 && colChange == 0)return entrance[0];
-	else if (rowChange == -1 && colChange == 0)return entrance[1];
+	if (rowChange == -1 && colChange == 0)return entrance[0];
+	else if (rowChange == 1 && colChange == 0)return entrance[1];
 	else if (rowChange == 0 && colChange == -1)return entrance[2];
 	else if (rowChange == 0 && colChange == 1)return entrance[3];
 	return false;
@@ -637,8 +643,8 @@ bool MyMap::getEntranceByMoveDirection_in(int rowChange, int colChange)
 
 myPosition MyMap::getEntrancePositionByMoveDirection_out(int rowChange, int colChange)
 {
-	if (rowChange == 1 && colChange == 0)return entrancePosition[0];
-	else if (rowChange == -1 && colChange == 0)return entrancePosition[1];
+	if (rowChange == -1 && colChange == 0)return entrancePosition[0];
+	else if (rowChange == 1 && colChange == 0)return entrancePosition[1];
 	else if (rowChange == 0 && colChange == -1)return entrancePosition[2];
 	else return entrancePosition[3];
 }
