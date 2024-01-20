@@ -113,9 +113,8 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 		{
 			std::cout << "Quit Game!" << std::endl;
 			ctrl->dealQuit();
-			diyiceng(cen, cen, room);
-			map->saveMap("resource/map/" + map->getMapName() + ".txt");
-			quit = true;
+			//map->saveMap("resource/map/" + map->getMapName() + ".txt");
+			break;
 		}
 		else if (GetAsyncKeyState(key_restart) & 0x8001)
 		{
@@ -142,10 +141,13 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 		else if (GetAsyncKeyState(key_pause) & 0x8001)
 		{
 			pause = !pause;
-			break;
+			
 		}
 
 		Sleep(200);
+	}
+	if (quit == 1) {
+		celebrate();
 	}
 }
 

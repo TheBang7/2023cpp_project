@@ -18,9 +18,9 @@ constexpr char key_up = 'W';
 constexpr char key_down = 'S';
 constexpr char key_left = 'A';
 constexpr char key_right = 'D';
-constexpr char key_quit = '0';
+constexpr char key_quit = VK_ESCAPE;
 constexpr char key_restart = 'R';
-constexpr char key_pause = VK_ESCAPE;
+constexpr char key_pause = '0';
 constexpr char key_back = 'Q';
 
 class MapCtrl
