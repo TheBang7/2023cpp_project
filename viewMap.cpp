@@ -11,7 +11,7 @@ ViewMap::ViewMap(MyMap* map)
 	this->map = map;
 	props = new IMAGE[Prop::ALL];
 	subProps = new IMAGE[Prop::ALL];
-	initgraph(ScreenWidth, ScreenHeight);
+	//initgraph(ScreenWidth, ScreenHeight);
 }
 
 void ViewMap::init_picture()

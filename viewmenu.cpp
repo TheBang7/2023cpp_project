@@ -11,6 +11,14 @@
 #pragma comment( lib, "MSIMG32.LIB")
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
+constexpr char key_up = 'W';
+constexpr char key_down = 'S';
+constexpr char key_left = 'A';
+constexpr char key_right = 'D';
+constexpr char key_quit = '0';
+constexpr char key_restart = 'R';
+constexpr char key_pause = VK_ESCAPE;
+constexpr char key_back = 'Q';
 void transparentimage(IMAGE* dstimg, int x, int y, IMAGE* srcimg, UINT transparentcolor)
 {
     HDC dstDC = GetImageHDC(dstimg);
@@ -66,12 +74,7 @@ void choosesave(MyMap* map,int& cen,int& room) {
 
     MOUSEMSG m;
     while (flag) {
-        if (_kbhit()) { // 如果有键被按下
-            int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
-                break;
-            }
-        }
+        if (GetAsyncKeyState(key_pause) & 0x8001)break;
         m = GetMouseMsg(); // 获取一条鼠标消息
         switch (m.uMsg) {
         case WM_MOUSEMOVE:
@@ -170,12 +173,10 @@ void chooseload(MyMap* map, int& cen, int& room) {
 
     MOUSEMSG m;
     while (flag) {
-        if (_kbhit()) { // 如果有键被按下
-            int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
+        if (GetAsyncKeyState(key_pause) & 0x8001) {
                 break;
             }
-        }
+        
         m = GetMouseMsg(); // 获取一条鼠标消息
         switch (m.uMsg) {
         case WM_MOUSEMOVE:
@@ -249,6 +250,7 @@ void chooseload(MyMap* map, int& cen, int& room) {
             break;
 
         }
+        Sleep(50);
     }
 }
 
@@ -278,13 +280,11 @@ void chooseCeng(int& cen, int& room) {
     bool flag1 = 0;
     MOUSEMSG m;
     while (flag1 == 0) {
-        if (_kbhit()) { // 如果有键被按下
-            int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
+        if (GetAsyncKeyState(key_pause) & 0x8001) {
                 menu1(cen, room);
                 break;
             }
-        }
+        
         m = GetMouseMsg(); // 获取一条鼠标消息
         switch (m.uMsg) {
         case WM_MOUSEMOVE:
@@ -345,7 +345,7 @@ void chooseCeng(int& cen, int& room) {
 
 
             break;
-
+            Sleep(50);
         }
     }
 
