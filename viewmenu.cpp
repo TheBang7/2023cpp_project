@@ -6,19 +6,16 @@
 #include "viewmenu.h"
 #include <graphics.h>	
 #include <chrono>
+#include <tchar.h>
+#include"windows.h"
+#include<winddi.h>
+
 #include"myMap.h"
 #include <conio.h>
 #pragma comment( lib, "MSIMG32.LIB")
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
-constexpr char key_up = 'W';
-constexpr char key_down = 'S';
-constexpr char key_left = 'A';
-constexpr char key_right = 'D';
-constexpr char key_quit = '0';
-constexpr char key_restart = 'R';
-constexpr char key_pause = VK_ESCAPE;
-constexpr char key_back = 'Q';
+
 void transparentimage(IMAGE* dstimg, int x, int y, IMAGE* srcimg, UINT transparentcolor)
 {
     HDC dstDC = GetImageHDC(dstimg);
@@ -34,8 +31,13 @@ void music(int a) {
     TCHAR cmd[256];
     wsprintf(cmd, _T("setaudio music volume to %d"), a*10);
     mciSendString(cmd, NULL, 0, NULL);
-
 }
+void music1(int a) {
+    TCHAR cmd[256];
+    wsprintf(cmd, _T("setaudio music1 volume to %d"), a * 10);
+    mciSendString(cmd, NULL, 0, NULL);
+}
+
 
 void drawButton(int x, int y, int w, int h, TCHAR* text, COLORREF color) {
     setbkmode(TRANSPARENT);
@@ -74,7 +76,12 @@ void choosesave(MyMap* map,int& cen,int& room) {
 
     MOUSEMSG m;
     while (flag) {
-        if (GetAsyncKeyState(key_pause) & 0x8001)break;
+        if (_kbhit()) { // 如果有键被按下
+            int key = _getch(); // 获取按下的键
+            if (key == VK_ESCAPE) {
+                break;
+            }
+        }
         m = GetMouseMsg(); // 获取一条鼠标消息
         switch (m.uMsg) {
         case WM_MOUSEMOVE:
@@ -148,6 +155,7 @@ void choosesave(MyMap* map,int& cen,int& room) {
         }
     }
 }
+
 void chooseload(MyMap* map, int& cen, int& room) {
     IMAGE background;
     loadimage(&background, _T("resource/地牢入口(1).jpg")); // 从文件中加载图片
@@ -173,10 +181,12 @@ void chooseload(MyMap* map, int& cen, int& room) {
 
     MOUSEMSG m;
     while (flag) {
-        if (GetAsyncKeyState(key_pause) & 0x8001) {
+        if (_kbhit()) { // 如果有键被按下
+            int key = _getch(); // 获取按下的键
+            if (key == VK_ESCAPE) {
                 break;
             }
-        
+        }
         m = GetMouseMsg(); // 获取一条鼠标消息
         switch (m.uMsg) {
         case WM_MOUSEMOVE:
@@ -280,11 +290,13 @@ void chooseCeng(int& cen, int& room) {
     bool flag1 = 0;
     MOUSEMSG m;
     while (flag1 == 0) {
-        if (GetAsyncKeyState(key_pause) & 0x8001) {
+        if (_kbhit()) { // 如果有键被按下
+            int key = _getch(); // 获取按下的键
+            if (key == VK_ESCAPE) {
                 menu1(cen, room);
                 break;
             }
-        
+        }
         m = GetMouseMsg(); // 获取一条鼠标消息
         switch (m.uMsg) {
         case WM_MOUSEMOVE:
@@ -347,6 +359,7 @@ void chooseCeng(int& cen, int& room) {
             break;
             Sleep(50);
         }
+        
     }
 
 
@@ -360,12 +373,10 @@ void diyiceng(int n, int& cen, int& room) {
     loadimage(&background, _T("resource/房间.png")); // 从文件中加载图片
     putimage(0, 0, &background); // 将图片绘制到窗口上，图片左上角坐标为 (0,0)
     while (true) {
-        if (_kbhit()) { // 如果有键被按下
-            int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
-                chooseCeng(cen, room);
-                break;
-            }
+        if (GetAsyncKeyState(key_quit) & 0x8001)
+        {
+            chooseCeng(cen, room);
+            break;
         }
         MOUSEMSG m;
         m = GetMouseMsg();
@@ -399,6 +410,7 @@ void diyiceng(int n, int& cen, int& room) {
                 break;
             }
         }
+        Sleep(50);
     }
 }
 
@@ -439,11 +451,10 @@ void startGame(int& cen, int& room) {
                     break;
                 }
                 // 在这里添加你想要在循环中执行的代码
-                if (_kbhit()) { // 如果有键被按下
-                    int key = _getch(); // 获取按下的键
-                    if (key == VK_ESCAPE) {
-                        flag2 = 1;
-                    }
+                if (GetAsyncKeyState(key_quit) & 0x8001)
+                {
+                    flag2 = 1;
+                    break;
                 }
             }
 
@@ -452,17 +463,81 @@ void startGame(int& cen, int& room) {
         else {
             break;
         }
+        Sleep(200);
     }
     chooseCeng(cen, room);
 }
 
 int volume = 5; // 初始音量
 
+void celebrate() {
 
-
-void shezhi(int& cen,int& room) {
-    cleardevice(); // 清空当前的图形设备
+    // 设置背景颜色为黑色
     
+    cleardevice();
+
+    mciSendString(_T("open resource/success.wav alias music1"), NULL, 0, NULL);
+
+    // 播放音乐
+
+    mciSendString(_T("play music1"), NULL, 0, NULL);
+    // 设置字体颜色为白色
+    settextcolor(RED);
+
+    // 设置背景模式为透明
+    setbkmode(TRANSPARENT);
+
+    // 设置字体为黑体
+    settextstyle(50, 0, _T("黑体"));
+
+    // 循环，逐渐增大字体大小
+    TCHAR victoryText[] = _T("恭喜通过这关");
+    int startSize = 10;
+    int endSize = 100;
+    int steps = 60 * 2; // 假设我们希望以60FPS的速率运行
+    int sleepTime = 1000 / 60; // 每一帧的延迟时间（毫秒）
+
+    for (int i = 0; i < steps; i++) {
+        cleardevice(); // 清除屏幕
+
+        // 计算当前步骤的字体大小
+        int currentSize = startSize + i * (endSize - startSize) / steps;
+
+        settextstyle(currentSize, 0, _T("黑体")); // 设置字体大小和字体
+        settextcolor(WHITE); // 将字体颜色设置为白色
+        setbkmode(TRANSPARENT); // 设置背景模式为透明
+
+        // 获取文本的宽度和高度，以便我们可以将其居中
+        int textWidth = textwidth(victoryText);
+        int textHeight = textheight(victoryText);
+
+        // 计算文本的位置
+        int x = (1250 - textWidth) / 2;
+        int y = (1000 - textHeight) / 2;
+        // 在屏幕上显示文本
+        outtextxy(x, y, victoryText);
+        // 计算文本的位置
+
+
+        // 在屏幕上显示文本
+        outtextxy(x, y, victoryText);
+
+        // 等待下一帧
+        Sleep(sleepTime);
+    }
+    mciSendString(_T("close music1"), NULL, 0, NULL);
+
+
+    // 按任意键退出
+    cleardevice();
+    
+}
+
+
+
+void shezhi(int& cen, int& room) {
+    cleardevice(); // 清空当前的图形设备
+
     IMAGE background; // 定义一个 IMAGE 对象用于存储背景图片
     loadimage(&background, _T("resource/设置图片.png")); // 从文件中加载图片
     putimage(0, 0, &background); // 将图片绘制到窗口上，图片左上角坐标为 (0,0)
@@ -485,14 +560,12 @@ void shezhi(int& cen,int& room) {
     outtextxy(950, 150, volumeText);
     MOUSEMSG m; // 定义鼠标消息
     while (true) {
-        if (_kbhit()) { // 如果有键被按下
-             int key = _getch(); // 获取按下的键
-             if (key == VK_ESCAPE) {
-                 menu1( cen, room);
-                 break;
-             }
+        if (GetAsyncKeyState(key_quit) & 0x8001)
+        {
+            menu1(cen, room);
+            break;
         }
-        
+
         m = GetMouseMsg(); // 获取一条鼠标消息
         switch (m.uMsg) {
         case WM_LBUTTONDOWN: // 鼠标左键按下
@@ -540,10 +613,9 @@ void shezhi(int& cen,int& room) {
             break;
 
         }
+        
     }
 }
-
-
 
 void menu1(int& cen,int& room) {
 
