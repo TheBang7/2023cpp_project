@@ -75,6 +75,19 @@ MyMap::MyMap()
 		}
 	}
 }
+void MyMap::reloadInf()
+{
+	for (int i = 0; i < numRows; ++i)
+	{
+		for (int j = 0; j < numCols; ++j)
+		{
+			if (i == 0 || j == 0 || i == numRows - 1 || j == numCols - 1)
+				mapGrid[i][j].type = Prop::WALL;
+			else
+				mapGrid[i][j].type = Prop::FLOOR;
+		}
+	}
+}
 
 MyMap::MyMap(bool isInf)
 {
@@ -86,8 +99,8 @@ MyMap::MyMap(bool isInf)
 		manPositionCol = 0;
 		manPositionRow = 0;
 
-		numCols = 5;
-		numRows = 5;
+		numCols = 7;
+		numRows = 7;
 		size = 25;
 		mapGrid = new MapGrid*[numRows];
 		for (int i = 0; i < numRows; ++i)
@@ -106,7 +119,10 @@ MyMap::MyMap(bool isInf)
 		{
 			for (int j = 0; j < numCols; ++j)
 			{
-				mapGrid[i][j].type = Prop::FLOOR;
+				if (i == 0 || j == 0 || i == numRows - 1 || j == numCols - 1)
+					mapGrid[i][j].type = Prop::WALL;
+				else
+					mapGrid[i][j].type = Prop::FLOOR;
 			}
 		}
 		for (int i = 0; i < numRows; ++i)
@@ -116,14 +132,14 @@ MyMap::MyMap(bool isInf)
 				mapGridRemains[i][j] = mapGrid[i][j];
 			}
 		}
-		entrancePosition[0].row = 0;
-		entrancePosition[0].col = 2;
-		entrancePosition[1].row = 4;
-		entrancePosition[1].col = 2;
-		entrancePosition[2].row = 2;
-		entrancePosition[2].col = 0;
-		entrancePosition[3].row = 2;
-		entrancePosition[3].col = 4;
+		entrancePosition[0].row = 1;
+		entrancePosition[0].col = 3;
+		entrancePosition[1].row = 6;
+		entrancePosition[1].col = 3;
+		entrancePosition[2].row = 3;
+		entrancePosition[2].col = 1;
+		entrancePosition[3].row = 3;
+		entrancePosition[3].col = 6;
 	}
 	else MyMap();
 }

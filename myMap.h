@@ -51,6 +51,7 @@ class MyMap
 public:
 	MyMap(int rows, int cols);
 	MyMap(bool isInf);
+	void reloadInf();
 	MyMap();
 	~MyMap();
 	void printMap();
