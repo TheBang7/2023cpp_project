@@ -68,7 +68,7 @@ void choosesave(MyMap* map,int& cen,int& room) {
     while (flag) {
         if (_kbhit()) { // 如果有键被按下
             int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
+            if (key == 27) {
                 break;
             }
         }
@@ -172,7 +172,7 @@ void chooseload(MyMap* map, int& cen, int& room) {
     while (flag) {
         if (_kbhit()) { // 如果有键被按下
             int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
+            if (key == 27) {
                 break;
             }
         }
@@ -280,7 +280,7 @@ void chooseCeng(int& cen, int& room) {
     while (flag1 == 0) {
         if (_kbhit()) { // 如果有键被按下
             int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
+            if (key == 27) {
                 menu1(cen, room);
                 break;
             }
@@ -362,7 +362,7 @@ void diyiceng(int n, int& cen, int& room) {
     while (true) {
         if (_kbhit()) { // 如果有键被按下
             int key = _getch(); // 获取按下的键
-            if (key == VK_ESCAPE) {
+            if (key == 27) {
                 chooseCeng(cen, room);
                 break;
             }
@@ -441,7 +441,7 @@ void startGame(int& cen, int& room) {
                 // 在这里添加你想要在循环中执行的代码
                 if (_kbhit()) { // 如果有键被按下
                     int key = _getch(); // 获取按下的键
-                    if (key == VK_ESCAPE) {
+                    if (key == 32) {
                         flag2 = 1;
                     }
                 }

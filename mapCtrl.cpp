@@ -15,6 +15,7 @@ MapCtrl::MapCtrl(ViewMap* viewMap, MyMap* infMap)
 	this->mainMap = viewMap->getMap();
 	this->initMap = viewMap->getMap();
 	manAreaBefore = Prop::FLOOR;
+	viewLastRound = myMap;
 	this->infMap = infMap;
 }
 
@@ -40,10 +41,11 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 
 	while (!quit)
 	{
+		viewLastRound = viewMap->getMap();
 
 		if (GetAsyncKeyState(0x49) & 0x8000){
 			cleardevice();
-			choosesave(mainMap, cen, room);
+			choosesave(initMap, cen, room);
 			break;
 		}
 
@@ -51,9 +53,9 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 		{
 			cleardevice();
 			// 'o' ¼ü±»°´ÏÂ
-			chooseload(mainMap, cen, room);
+			chooseload(initMap, cen, room);
 			cleardevice();
-			//map.printMap();
+			viewMap->begin();
 			
 		}
 
@@ -127,10 +129,17 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 			map->printMap();
 			map->setMapName("test3");
 			//ctrl->setMap(map);
+			while (!ctrl->backIdStack.empty())
+			{
+				backIdStack.pop();
+				backMapStack.pop();
+				backStack.pop();
+			}
 			ctrl->begin(cen,room,ifload);
 			MyMap* infMap = new MyMap(true);
 			delete ctrl->infMap;
 			ctrl->infMap = infMap;
+
 		}
 		else if (GetAsyncKeyState(key_pause) & 0x8001)
 		{
@@ -153,7 +162,7 @@ void MapCtrl::ownMapMove(MyMap* map, int rowChange, int colChange, int count, in
 {
 	MyChange* change = new MyChange(count + 1);
 	change->all = count + 1;
-	change->initView = viewMap->getMap();
+	change->initView = viewLastRound;
 	change->finalView = viewMap->getMap();
 	for (int i = 0; i <= count; i++)
 	{
@@ -196,31 +205,32 @@ void MapCtrl::ownMapMove(MyMap* map, int rowChange, int colChange, int count, in
 		else
 		{
 			change->final[i] = change->init[i - 1];
-			if (change->final[i] == Prop::SUB_MAP)
-			{
+			
+		}
+		if (change->final[i] == Prop::SUB_MAP&&i>0)
+		{
 
-				change->finalFather[i] = map->getSubMap(change->row[i - 1], change->col[i - 1])->outsideMap;
-				change->finalSubMap[i] = map->getSubMap(change->row[i - 1], change->col[i - 1]);
-			}
-			else if ((change->init[i] == Prop::HIT || change->init[i] == Prop::BOX_DEST) && change->final[i] ==
-				Prop::BOX)
-			{
-				change->final[i] = Prop::HIT;
-			}
-			else if ((change->init[i] == Prop::MAN_HIT || change->init[i] == Prop::MAN_DEST) && change->final[i] ==
-				Prop::MAN)
-			{
-				change->final[i] = Prop::MAN_HIT;
-			}
-			else if (change->init[i] == Prop::FLOOR && change->final[i] == Prop::HIT)
-			{
-				change->final[i] = Prop::BOX;
-			}
-			else if ((change->init[i] == Prop::FLOOR || change->init[i] == Prop::BOX_DEST) && change->final[i] ==
-				Prop::MAN_HIT)
-			{
-				change->final[i] = Prop::MAN;
-			}
+			change->finalFather[i] = map->getSubMap(change->row[i - 1], change->col[i - 1])->outsideMap;
+			change->finalSubMap[i] = map->getSubMap(change->row[i - 1], change->col[i - 1]);
+		}
+		else if ((map->getElementRemainsType(change->row[i], change->col[i]) == Prop::BOX_DEST) && change->final[i] ==
+			Prop::BOX)
+		{
+			change->final[i] = Prop::HIT;
+		}
+		else if ((map->getElementRemainsType(change->row[i], change->col[i]) == Prop::MAN_DEST) && change->final[i] ==
+			Prop::MAN)
+		{
+			change->final[i] = Prop::MAN_HIT;
+		}
+		else if (map->getElementRemainsType(change->row[i], change->col[i]) != Prop::BOX_DEST && change->final[i] == Prop::HIT)
+		{
+			change->final[i] = Prop::BOX;
+		}
+		else if (map->getElementRemainsType(change->row[i], change->col[i]) != Prop::MAN_DEST && change->final[i] ==
+			Prop::MAN_HIT)
+		{
+			change->final[i] = Prop::MAN;
 		}
 	}
 	map->dealChange(change);
@@ -276,7 +286,7 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 				}
 
 				if (out->canMove(rowChange, colChange, position.row + rowChange, position.col + colChange,
-				                 false, 0).canMove)
+ 				                 false, 0).canMove)
 				{
 					bool loop = out->loopMove(rowChange, colChange, position.row + rowChange,
 					                          position.col + colChange, false, 0);
@@ -296,28 +306,28 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 						transMapMove(out, rowChange, colChange, position.row + rowChange,
 						             position.col + colChange,
 						             &grid2, false, loop);
-						if (dealingInitMap)
-							viewMap->begin();
+
 					}
 					else
 					{
 						MapGrid grid;
 						grid.map = map->getElement(backRow, backCol)->map;
 						grid.type = map->getElement(backRow, backCol)->type;
-						transMapMove(out, rowChange, colChange, position.row + rowChange,
-						             position.col + colChange,
-						             &grid, false, loop);
 						if (grid.type == Prop::MAN || grid.type == Prop::MAN_HIT)
 						{
 							setMap(out);
 						}
+						transMapMove(out, rowChange, colChange, position.row + rowChange,
+						             position.col + colChange,
+						             &grid, false, loop);
+
 
 						if (!map->isInMap(initRow, initCol))
 							ownMapMove(map, rowChange, colChange, tcount + 1, backRow, backCol, firstGrid,
 							           dealingInitMap);
 						else
 							ownMapMove(map, rowChange, colChange, tcount, initRow, initCol, firstGrid, dealingInitMap);
-						if (dealingInitMap)
+						if (dealingInitMap&&viewMap->getMap()!=viewLastRound)
 							viewMap->begin();
 					}
 				}
@@ -338,8 +348,8 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 						myPosition position = subMap->getEntrancePositionByMoveDirection_in(rowChange, colChange);
 						if (subMap->canMove(rowChange, colChange, position.row, position.col, false, 0).canMove)
 						{
-							subMap->outsidePosition.row = backRow;
-							subMap->outsidePosition.col = backCol;
+							//subMap->outsidePosition.row = backRow;
+							//subMap->outsidePosition.col = backCol;
 							bool loop = subMap->loopMove(rowChange, colChange, position.row, position.col, false, 0);
 							if (loop)
 							{
@@ -358,20 +368,28 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 								{
 									setMap(subMap);
 								}
-								if (dealingInitMap)
+								if (dealingInitMap && viewMap->getMap() != viewLastRound)
 									viewMap->begin();
 							}
 							else
 							{
 								MapGrid grid, grid2;
-								grid2.map = map->getElement(backRow - rowChange, backCol - colChange)->map;
-								grid2.type = map->getElement(backRow - rowChange, backCol - colChange)->type;
-								transMapMove(subMap, rowChange, colChange, position.row, position.col,
-								             &grid2, false, loop);
+								if (backRow == initRow && backCol == initCol) {
+									grid2.map = firstGrid->map;
+									grid2.type = firstGrid->type;
+								}
+								else {
+									grid2.map = map->getElement(backRow - rowChange, backCol - colChange)->map;
+									grid2.type = map->getElement(backRow - rowChange, backCol - colChange)->type;
+								}
 								if (grid2.type == Prop::MAN || grid.type == Prop::MAN_HIT)
 								{
 									setMap(subMap);
 								}
+
+								transMapMove(subMap, rowChange, colChange, position.row, position.col,
+								             &grid2, false, loop);
+
 
 								ownMapMove(map, rowChange, colChange, tcount - 1, initRow, initCol, firstGrid,
 								           dealingInitMap);
@@ -400,10 +418,10 @@ bool MapCtrl::dealMove(int const rowChange, int const colChange)
 	transMapMove(this->myMap, rowChange, colChange, manRow, manCol,
 	             myMap->getElement(manRow, manCol), true, false);
 	countInf = 0;
-	if (initMap->shouldCheck)
+	if (this->myMap->shouldCheck)
 	{
 		std::cout << "check!" << std::endl;
-		initMap->shouldCheck = false;
+		this->myMap->shouldCheck = false;
 		return initMap->checkMap();
 	}
 }
@@ -435,6 +453,7 @@ void MapCtrl::dealBack()
 	const int id = backIdStack.top();
 	int count = 0;
 	MyMap* finalView = backStack.top()->initView;
+	bool flag = true;
 	while (!backIdStack.empty() && backIdStack.top() == id)
 	{
 		count++;
@@ -442,8 +461,11 @@ void MapCtrl::dealBack()
 		backMapStack.top()->backChange(backStack.top());
 		if (viewMap->getMap() == backMapStack.top())
 			viewMap->backChange(backStack.top());
-		if (backStack.top()->initView != nullptr)
+		if (flag&&backStack.top()->initView != nullptr) {
 			finalView = backStack.top()->initView;
+			flag = false;
+		}
+			
 		backMapStack.pop();
 		MyChange* change = backStack.top();
 		backStack.pop();

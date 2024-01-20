@@ -51,6 +51,7 @@ private:
 	std::stack<MyMap*> backMapStack;
 	std::stack<int> backIdStack;
 	ViewMap* viewMap;
+	MyMap* viewLastRound;
 	MyMap* myMap;
 	int manAreaBefore;
 	bool dealMove(int const rowChange, int const colChange);
