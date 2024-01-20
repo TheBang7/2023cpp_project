@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 			pause = !pause;
 		}
 
-		Sleep(200);
+		Sleep(50);
 	}
 	return 0;
 }
