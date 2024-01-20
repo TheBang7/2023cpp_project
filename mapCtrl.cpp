@@ -36,33 +36,24 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 	MapCtrl* ctrl = this;
 	MyMap* map = this->myMap;
 
-	// 添加菜单按钮
-	int x = 50, y = 100; // 将 y 坐标上移
-	int w = 100, h = 60; // 增大按钮的宽度和高度
-	TCHAR text[20] = "save";
-	drawButton(x, y, w, h, text, WHITE);
-	y += 70; // 更新 y 坐标
-	TCHAR textMenu[20] = "load";
-	drawButton(x, y, w, h, textMenu, WHITE);
-
-	
 	while (!quit)
 	{
 
-		if (GetAsyncKeyState(0x49) & 0x8000)
-		{
+		if (GetAsyncKeyState(0x49) & 0x8000){
+			cleardevice();
 			choosesave(mainMap, cen, room);
 			break;
 		}
 
 		if (GetAsyncKeyState(0x4F) & 0x8000)
 		{
+			cleardevice();
 			// 'o' 键被按下
 			chooseload(mainMap, cen, room);
-			ifload = 1;
-			break;
+			cleardevice();
+			//map.printMap();
+			
 		}
-
 
 
 
@@ -142,6 +133,7 @@ void MapCtrl::begin(int& cen,int&room,int& ifload)
 		else if (GetAsyncKeyState(key_pause) & 0x8001)
 		{
 			pause = !pause;
+			break;
 		}
 
 		Sleep(200);
