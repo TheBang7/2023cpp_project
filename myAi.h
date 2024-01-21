@@ -2,6 +2,7 @@
 #include <random>
 #include <string>
 #include <unordered_map>
+#include <sstream>
 
 #include "myMap.h"
 
@@ -15,27 +16,30 @@ enum Direction
 	ALL_Dir,
 };
 
-constexpr int ALPHA = 1;
-constexpr double INI_VALUE = 10;
+constexpr double ALPHA = 1;
+constexpr double INI_VALUE = 0;
+constexpr double FULL_VALUE = 5;
 constexpr double EPSILON = 0.5;
-constexpr double GAMMA = 0.5;
+constexpr double GAMMA = 0.9;
 constexpr double FAIL_VALUE = -9999;
-constexpr double END_VALUE = 100;
+constexpr double END_VALUE = 999999;
 
 
 class MyAi
 {
-private :
+private:
 	std::unordered_map<std::string, int> state_table;
-	std::vector<int*> q_table;
-	int getStateIndex(std::string state);
 	int countState;
-	int selectAction(int state_index,bool isTraining);
 	std::default_random_engine randomEngine;
-	int getReward(MyMap* map,std::string prev_state);
+
 
 public :
 	std::string stateAbstration(MyMap* map);
+	std::vector<std::vector<double>> q_table;
+	int selectAction(int state_index, bool isTraining,int action);
+	int getStateIndex(std::string state);
+	double updateQ_table(int state_index, int prev_state_index, int action, double reward);
+	double getReward(MyMap* map, std::string &prev_state, std::string &state£¬bool,bool isInitMap);
 	MyAi();
 	~MyAi();
 };

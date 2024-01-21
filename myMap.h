@@ -91,11 +91,12 @@ public:
 	bool shouldCheck =false;
 	bool checkMap();
 	bool checked = false;
+	std::vector<MyMap*> mapList;
 
 
 private:
 	std::unordered_map<std::string, MyMap*> hashMap;
-	std::vector<MyMap*> mapList;
+
 	std::string mapName;
 	bool hasMapGrid = false;
 	void saveMap(std::ofstream& outFile, int countSub);

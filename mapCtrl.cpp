@@ -5,6 +5,8 @@
 #include <conio.h>
 #include <iostream>
 #include <sstream>
+
+#include "myAi.h"
 #include "viewmenu.h"
 
 
@@ -30,11 +32,36 @@ MapCtrl::~MapCtrl()
 	}
 }
 
+void loadAndRstView(ViewMap* viewMap, MyMap* map)
+{
+	map->printed = true;
+	int row = map->getNumRows();
+	int col = map->getNumCols();
+	for (int i = 0; i < row; i++)
+		for (int j = 0; j < col; j++)
+		{
+			if (map->getElementType(i, j) == Prop::MAN_HIT || map->getElementType(i, j) == Prop::MAN)
+			{
+				viewMap->setMap(map);
+				return;
+			}
+		}
+	for (int i = 0; i < row; i++)
+		for (int j = 0; j < col; j++)
+		{
+			if (map->getElementType(i, j) == Prop::SUB_MAP && !map->getSubMap(i, j)->printed)
+			{
+				loadAndRstView(viewMap, map->getSubMap(i, j));
+			}
+		}
+}
+
 
 void MapCtrl::begin(int& cen, int& room, int& ifload)
 {
 	viewMap->setMap(this->myMap);
-	viewMap->begin();
+	if (!isTraining)
+		viewMap->begin();
 	bool quit = false;
 	bool pause = false;
 	MapCtrl* ctrl = this;
@@ -44,20 +71,29 @@ void MapCtrl::begin(int& cen, int& room, int& ifload)
 	{
 		viewLastRound = viewMap->getMap();
 
-		if (GetAsyncKeyState(0x49) & 0x8000)
+		if (GetAsyncKeyState('I') & 0x8001)
 		{
 			cleardevice();
 			choosesave(initMap, cen, room);
-			break;
+			if (!isTraining)
+				viewMap->begin();
 		}
-		if (GetAsyncKeyState(0x4F) & 0x8000)
+		else if (GetAsyncKeyState('O') & 0x8001)
 		{
 			cleardevice();
 			chooseload(initMap, cen, room);
 			cleardevice();
-			viewMap->begin();
+			loadAndRstView(viewMap, initMap);
+			setMap(viewMap->getMap());
+			for (MyMap* map : initMap->mapList)
+			{
+				map->printed = false;
+			}
+			initMap->printed = false;
+			if (!isTraining)
+				viewMap->begin();
 		}
-		if (GetAsyncKeyState(key_up) & 0x8001 && !pause)
+		else if (GetAsyncKeyState(key_up) & 0x8001 && !pause)
 		{
 			std::cout << "Move Up!" << std::endl;
 			bool flag = ctrl->dealUp();
@@ -111,34 +147,27 @@ void MapCtrl::begin(int& cen, int& room, int& ifload)
 		{
 			std::cout << "Quit Game!" << std::endl;
 			ctrl->dealQuit();
-			Sleep(200);
 			//map->saveMap("resource/map/" + map->getMapName() + ".txt");
 			break;
 		}
 		else if (GetAsyncKeyState(key_restart) & 0x8001)
 		{
 			std::cout << "Restart Game!" << std::endl;
-			std::stringstream ss;
-			ss << "resource/map/" << cen << "." << room << ".txt";
-			std::string filename = ss.str();
-			map->loadMap(filename);
-			map->printMap();
-			map->setMapName("test3");
-			//ctrl->setMap(map);
-			while (!ctrl->backIdStack.empty())
-			{
-				backIdStack.pop();
-				backMapStack.pop();
-				backStack.pop();
-			}
-			ctrl->infMap->reloadInf();
-			std::cout << "infMap!:";
-			ctrl->begin(cen, room, ifload);
-
+			ctrl->dealRestart(cen, room);
+			//ctrl->begin(cen, room, ifload);
 		}
 		else if (GetAsyncKeyState(key_pause) & 0x8001)
 		{
 			pause = !pause;
+			if (pause)
+				std::cout << "Pause Game!" << std::endl;
+			else
+				std::cout << "Continue Game!" << std::endl;
+		}
+		else if (GetAsyncKeyState('9') & 0x8001)
+		{
+			std::cout << "Start Ai!" << std::endl;
+			dealAi(cen, room);
 		}
 
 		Sleep(200);
@@ -148,6 +177,135 @@ void MapCtrl::begin(int& cen, int& room, int& ifload)
 		celebrate();
 	}
 }
+
+void MapCtrl::dealAi(int cen, int room)
+{
+	MyAi ai;
+	int TrainTime = 500000;
+	int maxStep = 100;
+	isTraining = true;
+	double grade_sum = 0;
+	bool success = false;
+	for (int i = 0; i < TrainTime; i++)
+	{
+		if (GetAsyncKeyState(VK_ESCAPE) & 0x8001)
+		{
+			break;
+		}
+		if (i % 1000 == 0)
+		{
+			std::cout << "Train times: " << i << " grade_sum: " << grade_sum << "  success?: ";
+			if (success)std::cout << "yes" << std::endl;
+			else std::cout << "no" << std::endl;
+		}
+		grade_sum = 0;
+		std::string state, prev_state;
+		int state_index = 0, prev_state_index = 0;
+		int action = -1, prev_action = -1;
+		for (int j = 0; j < maxStep; j++)
+		{
+			//Sleep(500);
+			state = ai.stateAbstration(this->myMap);
+			state_index = ai.getStateIndex(state);
+			if (j > 0)
+			{
+				double r = ai.getReward(myMap, prev_state, state, myMap == initMap);
+				grade_sum += ai.updateQ_table(state_index, prev_state_index, prev_action, r);
+			}
+			int t_action = ai.selectAction(state_index, isTraining, action);
+			action = t_action;
+			bool flag = false;
+			switch (action)
+			{
+			case 0:
+				flag = dealUp();
+				break;
+			case 1:
+				flag = dealDown();
+				break;
+			case 2:
+				flag = dealLeft();
+				break;
+			case 3:
+				flag = dealRight();
+				break;
+			default:
+				dealRestart(cen, room);
+			}
+			prev_state = state;
+			prev_state_index = state_index;
+			prev_action = action;
+			if (flag)
+			{
+				success = true;
+				break;
+			}
+		}
+		double r = ai.getReward(myMap, prev_state, state, myMap == initMap);
+		grade_sum += ai.updateQ_table(state_index, prev_state_index, prev_action, r);
+		dealRestart(cen, room);
+	}
+	isTraining = false;
+	std::cout << "Train Finish";
+	dealRestart(cen, room);
+	bool flag = false, ff = false;
+	success = false;
+	Sleep(500);
+	while (!flag && !ff)
+	{
+		std::string state, prev_state;
+		int state_index = 0, prev_state_index = 0;
+		int action = -1, prev_action = -1;
+		for (int j = 0; j < maxStep; j++)
+		{
+			if (GetAsyncKeyState(VK_ESCAPE) & 0x8001)
+			{
+				ff = true;
+				break;
+			}
+			Sleep(300);
+			state = ai.stateAbstration(this->myMap);
+			state_index = ai.getStateIndex(state);
+			std::vector<double> value = ai.q_table[state_index];
+			int t_action = ai.selectAction(state_index, isTraining, action);
+			action = t_action;
+			if (j > 0)
+			{
+				double r = ai.getReward(myMap, prev_state, state, myMap == initMap);
+				grade_sum += ai.updateQ_table(state_index, prev_state_index, prev_action, r);
+			}
+
+			switch (action)
+			{
+			case 0:
+				flag = dealUp();
+				break;
+			case 1:
+				flag = dealDown();
+				break;
+			case 2:
+				flag = dealLeft();
+				break;
+			case 3:
+				flag = dealRight();
+				break;
+			default:
+				dealRestart(cen, room);
+			}
+			if (flag)
+			{
+				break;
+			}
+			prev_state = state;
+			prev_state_index = state_index;
+			prev_action = action;
+		}
+		ai.updateQ_table(state_index, prev_state_index, prev_action,
+		                 ai.getReward(myMap, prev_state, state, myMap == initMap));
+		dealRestart(cen, room);
+	}
+}
+
 
 void MapCtrl::dealQuit()
 {
@@ -230,7 +388,7 @@ void MapCtrl::ownMapMove(MyMap* map, int rowChange, int colChange, int count, in
 		}
 	}
 	map->dealChange(change);
-	if (viewMap->getMap() == map)
+	if (!isTraining && viewMap->getMap() == map)
 		viewMap->dealChange(change);
 	backStack.push(change);
 	backIdStack.push(countStep);
@@ -312,21 +470,17 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 						{
 							setMap(out);
 						}
-						if (out != infMap)
-							transMapMove(out, rowChange, colChange, position.row + rowChange,
-							             position.col + colChange,
-							             &grid, false, loop);
-						else
-							transMapMove(out, rowChange, colChange, position.row,
-							             position.col,
-							             &grid, false, loop);
+						transMapMove(out, rowChange, colChange, position.row + rowChange,
+						             position.col + colChange,
+						             &grid, false, loop);
+
 
 						if (!map->isInMap(initRow, initCol))
 							ownMapMove(map, rowChange, colChange, tcount + 1, backRow, backCol, firstGrid,
 							           dealingInitMap);
 						else
 							ownMapMove(map, rowChange, colChange, tcount, initRow, initCol, firstGrid, dealingInitMap);
-						if (dealingInitMap && viewMap->getMap() != viewLastRound)
+						if (!isTraining && dealingInitMap && viewMap->getMap() != viewLastRound)
 							viewMap->begin();
 					}
 				}
@@ -367,7 +521,7 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 								{
 									setMap(subMap);
 								}
-								if (dealingInitMap && viewMap->getMap() != viewLastRound)
+								if (!isTraining && dealingInitMap && viewMap->getMap() != viewLastRound)
 									viewMap->begin();
 							}
 							else
@@ -394,7 +548,7 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 
 								ownMapMove(map, rowChange, colChange, tcount - 1, initRow, initCol, firstGrid,
 								           dealingInitMap);
-								if (dealingInitMap)
+								if (!isTraining && dealingInitMap)
 									viewMap->begin();
 							}
 						}
@@ -421,7 +575,6 @@ bool MapCtrl::dealMove(int const rowChange, int const colChange)
 	countInf = 0;
 	if (this->myMap->shouldCheck)
 	{
-		std::cout << "check!" << std::endl;
 		this->myMap->shouldCheck = false;
 		return initMap->checkMap();
 	}
@@ -446,6 +599,27 @@ bool MapCtrl::dealLeft()
 bool MapCtrl::dealRight()
 {
 	return dealMove(0, 1);
+}
+
+void MapCtrl::dealRestart(int cen, int room)
+{
+	MapCtrl* ctrl = this;
+	MyMap* map = ctrl->initMap;
+	std::stringstream ss;
+	ss << "resource/map/" << cen << "." << room << ".txt";
+	std::string filename = ss.str();
+	map->loadMap(filename);
+	ctrl->setMap(map);
+	while (!ctrl->backIdStack.empty())
+	{
+		backIdStack.pop();
+		backMapStack.pop();
+		backStack.pop();
+	}
+	ctrl->infMap->reloadInf();
+	viewMap->setMap((map));
+	if (!isTraining)
+		viewMap->begin();
 }
 
 void MapCtrl::dealBack()
@@ -477,7 +651,8 @@ void MapCtrl::dealBack()
 			{
 				myMap = finalView;
 				setMap(finalView);
-				viewMap->begin();
+				if (!isTraining)
+					viewMap->begin();
 			}
 		}
 		delete change;

@@ -40,13 +40,14 @@ public:
 	bool dealRight();
 	void setMap(MyMap* map);
 	void dealBack();
+	void dealRestart(int cen, int room);
+	void dealAi(int cen, int room);
 	MyMap* getMap();
 	MyMap* infMap;
 	MyMap* initMap;
 	bool isTraining=false;
 
 private:
-
 	std::stack<MyChange*> backStack;
 	std::stack<MyMap*> backMapStack;
 	std::stack<int> backIdStack;
@@ -59,6 +60,7 @@ private:
 	const int maxInf = 10;
 	int countStep = 0;
 	MyMap* mainMap;
+
 };
 
 #endif // MAP_CTRL_H

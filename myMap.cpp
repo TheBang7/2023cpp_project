@@ -75,6 +75,7 @@ MyMap::MyMap()
 		}
 	}
 }
+
 void MyMap::reloadInf()
 {
 	for (int i = 0; i < numRows; ++i)
@@ -132,12 +133,12 @@ MyMap::MyMap(bool isInf)
 				mapGridRemains[i][j] = mapGrid[i][j];
 			}
 		}
-		entrancePosition[0].row = 1;
+		entrancePosition[0].row = 0;
 		entrancePosition[0].col = 3;
-		entrancePosition[1].row = 6;
+		entrancePosition[1].row = 0;
 		entrancePosition[1].col = 3;
 		entrancePosition[2].row = 3;
-		entrancePosition[2].col = 1;
+		entrancePosition[2].col = 0;
 		entrancePosition[3].row = 3;
 		entrancePosition[3].col = 6;
 	}
@@ -326,7 +327,9 @@ void MyMap::dealChange(MyChange* change)
 		if (change->final[i] == Prop::SUB_MAP)
 		{
 			if (change->finalSubMap[i]->outsideMap != change->finalFather[i] ||
-				(abs(change->finalSubMap[i]->outsidePosition.row - change->row[i]) + (abs(change->finalSubMap[i]->outsidePosition.col - change->col[i])) <= 1)) {
+				(abs(change->finalSubMap[i]->outsidePosition.row - change->row[i]) + (abs(
+					change->finalSubMap[i]->outsidePosition.col - change->col[i])) <= 1))
+			{
 				change->finalSubMap[i]->outsidePosition.row = change->row[i];
 				change->finalSubMap[i]->outsidePosition.col = change->col[i];
 				change->finalSubMap[i]->outsideMap = change->finalFather[i];
@@ -409,6 +412,11 @@ void MyMap::saveMap(std::string address)
 	std::cout << "map saved: " + address << std::endl;
 	// 关闭文件
 	outFile.close();
+	for (MyMap* map : mapList)
+	{
+		map->printed = false;
+	}
+	printed = false;
 }
 
 void MyMap::saveMap(std::ofstream& outFile, int countSub)
@@ -484,7 +492,8 @@ void MyMap::loadMap(std::string address)
 		}
 		delete[] mapGrid;
 	}
-	for (MyMap* map : mapList) {
+	for (MyMap* map : mapList)
+	{
 		delete map;
 	}
 	mapList.clear();
@@ -520,7 +529,6 @@ void MyMap::loadMap(std::string address)
 		{
 			mapPtr = new MyMap(rows, cols);
 			mapList.push_back(mapPtr);
-			std::cout << mapPtr->getNumRows() << "   " << mapPtr->getNumCols() << std::endl;
 		}
 		mapPtr->setMapName(name);
 		std::vector<myPosition> top;
@@ -562,7 +570,7 @@ void MyMap::loadMap(std::string address)
 						mapPtr->manPositionRow = i;
 					}
 					mapPtr->setGridType(i, j, typeValue);
-					if (((i == 0 || i == rows - 1) && (j != 0 && j !=cols - 1) ||
+					if (((i == 0 || i == rows - 1) && (j != 0 && j != cols - 1) ||
 							(i != 0 && i != rows - 1) && (j == 0 || j == cols - 1))
 						&& typeValue != Prop::WALL)
 					{
@@ -602,17 +610,18 @@ void MyMap::loadMap(std::string address)
 				}
 			}
 		}
-		for (int i = 0;i < 4;i++) {
-			if (mapPtr->entrance[i]) {
-				if(i==0)
+		for (int i = 0; i < 4; i++)
+		{
+			if (mapPtr->entrance[i])
+			{
+				if (i == 0)
 					mapPtr->entrancePosition[i] = top[top.size() / 2];
-				else if(i==1)
+				else if (i == 1)
 					mapPtr->entrancePosition[i] = down[down.size() / 2];
 				else if (i == 2)
 					mapPtr->entrancePosition[i] = left[left.size() / 2];
-				else 
+				else
 					mapPtr->entrancePosition[i] = right[right.size() / 2];
-
 			}
 		}
 
@@ -654,7 +663,6 @@ void MyMap::loadMap(std::string address)
 				}
 			}
 	}
-
 
 
 	// 关闭文件
@@ -723,6 +731,12 @@ moveInfo MyMap::canMove(int const rowChange, int const colChange, int const init
 	{
 		bool flag = false;
 		MyMap* myMap = this;
+		if (myMap == nullptr)
+		{
+			info.canMove = false;
+			info.shouldInf = false;
+			return info;
+		}
 		int count = 1;
 		int finalRow = initRow;
 		int finalCol = initCol;
@@ -735,7 +749,8 @@ moveInfo MyMap::canMove(int const rowChange, int const colChange, int const init
 		{
 			if (myMap->getElementType(finalRow, finalCol) == Prop::MAN)
 			{
-				if (loop) {
+				if (loop)
+				{
 					info.canMove = true;
 					return info;
 				}
@@ -879,9 +894,11 @@ bool MyMap::loopMove(int const rowChange, int const colChange, int const initRow
 		return false;
 	}
 }
+
 bool MyMap::checkMap()
 {
 	std::vector<MyMap*> list;
+	list.push_back(this);
 	bool flag = checkMap(list);
 	for (auto t : list)
 		t->checked = false;
@@ -891,20 +908,22 @@ bool MyMap::checkMap()
 bool MyMap::checkMap(std::vector<MyMap*>& list)
 {
 	this->checked = true;
-	list.push_back(this);
+
 	for (int i = 0; i < numRows; i++)
 	{
 		for (int j = 0; j < numCols; j++)
 		{
-			if (mapGrid[i][j].type == Prop::BOX_DEST) return false;
+			if (mapGrid[i][j].type == Prop::BOX_DEST || mapGrid[i][j].type == Prop::MAN_DEST || mapGrid[i][j].
+				type != Prop::MAN_HIT && mapGridRemains[i][j].type == Prop::MAN_DEST) return false;
 			if (mapGrid[i][j].type == Prop::SUB_MAP)
 			{
-				if(!mapGrid[i][j].map->checked)
+				if (!mapGrid[i][j].map->checked)
 				{
+					mapGrid[i][j].map->checked = true;
+					list.push_back(mapGrid[i][j].map);
 					bool flag = mapGrid[i][j].map->checkMap(list);
 					if (!flag) return false;
 				}
-
 			}
 		}
 	}
