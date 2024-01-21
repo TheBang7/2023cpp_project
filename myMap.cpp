@@ -7,6 +7,8 @@
 #include <fstream>
 #include "MapGrid.h"
 #include<iostream>
+#include<windows.h>
+
 
 MyMap::MyMap(int rows, int cols) : numRows(rows), numCols(cols), size(rows * cols)
 {
@@ -482,7 +484,7 @@ void MyMap::loadMap(std::string address)
 	if (!inFile.is_open())
 	{
 		std::cerr << "无法打开文件" << address << "来加载地图" << std::endl;
-		return;
+		
 	}
 	if (hasMapGrid)
 	{
@@ -502,146 +504,158 @@ void MyMap::loadMap(std::string address)
 	std::string name, mainName;
 	// 读取地图信息
 	bool flag = true;
-	while (inFile >> name)
-	{
-		inFile >> rows >> cols;
-		MyMap* mapPtr;
-		if (flag)
+	try {
+		while (inFile >> name)
 		{
-			mapPtr = this;
-			numRows = rows;
-			numCols = cols;
-			for (int i = 0; i <= 3; i++)entrance[i] = false;
-			mapGrid = new MapGrid*[numRows];
-			for (int i = 0; i < this->numRows; ++i)
+			inFile >> rows >> cols;
+			MyMap* mapPtr;
+			if (flag)
 			{
-				mapGrid[i] = new MapGrid[numCols];
-			}
-			mapGridRemains = new MapGrid*[numRows];
-			for (int i = 0; i < this->numRows; ++i)
-			{
-				mapGridRemains[i] = new MapGrid[numCols];
-			}
-
-			flag = false;
-		}
-		else
-		{
-			mapPtr = new MyMap(rows, cols);
-			mapList.push_back(mapPtr);
-		}
-		mapPtr->setMapName(name);
-		std::vector<myPosition> top;
-		std::vector<myPosition> down;
-		std::vector<myPosition> left;
-		std::vector<myPosition> right;
-
-
-		for (int i = 0; i < rows; ++i)
-		{
-			for (int j = 0; j < cols; ++j)
-			{
-				std::string type;
-				inFile >> type;
-				bool isSingleDigit = true;
-				for (char ch : type)
+				mapPtr = this;
+				numRows = rows;
+				numCols = cols;
+				for (int i = 0; i <= 3; i++)entrance[i] = false;
+				mapGrid = new MapGrid * [numRows];
+				for (int i = 0; i < this->numRows; ++i)
 				{
-					if (!std::isdigit(ch))
+					mapGrid[i] = new MapGrid[numCols];
+				}
+				mapGridRemains = new MapGrid * [numRows];
+				for (int i = 0; i < this->numRows; ++i)
+				{
+					mapGridRemains[i] = new MapGrid[numCols];
+				}
+
+
+				flag = false;
+			}
+			else
+			{
+				mapPtr = new MyMap(rows, cols);
+				mapList.push_back(mapPtr);
+			}
+			mapPtr->setMapName(name);
+			std::vector<myPosition> top;
+			std::vector<myPosition> down;
+			std::vector<myPosition> left;
+			std::vector<myPosition> right;
+
+			for (int i = 0; i < rows; ++i)
+			{
+				for (int j = 0; j < cols; ++j)
+				{
+					std::string type;
+					inFile >> type;
+					bool isSingleDigit = true;
+					for (char ch : type)
 					{
-						isSingleDigit = false;
-						break;
+						if (!std::isdigit(ch))
+						{
+							isSingleDigit = false;
+							break;
+						}
+					}
+					if (!isSingleDigit)
+					{
+						mapPtr->setGridType(i, j, Prop::SUB_MAP);
+						mapPtr->setSubMapName(i, j, type);
+						//mapPtr->setSubMap(i,j,mapPtr);
+					}
+					else
+					{
+						int typeValue = std::stoi(type);
+						if (typeValue >= Prop::ALL)
+						{
+							throw std::out_of_range("Invalid Map File: MapGrid ERROR !");
+						}
+						else if (typeValue == Prop::MAN)
+						{
+							mapPtr->manPositionCol = j;
+							mapPtr->manPositionRow = i;
+						}
+						mapPtr->setGridType(i, j, typeValue);
+						if (((i == 0 || i == rows - 1) && (j != 0 && j != cols - 1) ||
+							(i != 0 && i != rows - 1) && (j == 0 || j == cols - 1))
+							&& typeValue != Prop::WALL)
+						{
+							if (i == 0)
+							{
+								mapPtr->entrance[0] = true;
+								myPosition p;
+								p.row = i;
+								p.col = j;
+								top.push_back(p);
+							}
+							else if (i == rows - 1)
+							{
+								mapPtr->entrance[1] = true;
+								myPosition p;
+								p.row = i;
+								p.col = j;
+								down.push_back(p);
+							}
+							else if (j == 0)
+							{
+								mapPtr->entrance[2] = true;
+								myPosition p;
+								p.row = i;
+								p.col = j;
+								left.push_back(p);
+							}
+							else if (j == cols - 1)
+							{
+								mapPtr->entrance[3] = true;
+								myPosition p;
+								p.row = i;
+								p.col = j;
+								right.push_back(p);
+							}
+						}
 					}
 				}
-				if (!isSingleDigit)
+			}
+			for (int i = 0; i < 4; i++)
+			{
+				if (mapPtr->entrance[i])
 				{
-					mapPtr->setGridType(i, j, Prop::SUB_MAP);
-					mapPtr->setSubMapName(i, j, type);
+					if (i == 0)
+						mapPtr->entrancePosition[i] = top[top.size() / 2];
+					else if (i == 1)
+						mapPtr->entrancePosition[i] = down[down.size() / 2];
+					else if (i == 2)
+						mapPtr->entrancePosition[i] = left[left.size() / 2];
+					else
+						mapPtr->entrancePosition[i] = right[right.size() / 2];
 				}
-				else
+			}
+
+			for (int i = 0; i < rows; ++i)
+			{
+				for (int j = 0; j < cols; ++j)
 				{
+					std::string type;
+					inFile >> type;
+
 					int typeValue = std::stoi(type);
 					if (typeValue >= Prop::ALL)
 					{
 						throw std::out_of_range("Invalid Map File: MapGrid ERROR !");
 					}
-					else if (typeValue == Prop::MAN)
-					{
-						mapPtr->manPositionCol = j;
-						mapPtr->manPositionRow = i;
-					}
-					mapPtr->setGridType(i, j, typeValue);
-					if (((i == 0 || i == rows - 1) && (j != 0 && j != cols - 1) ||
-							(i != 0 && i != rows - 1) && (j == 0 || j == cols - 1))
-						&& typeValue != Prop::WALL)
-					{
-						if (i == 0)
-						{
-							mapPtr->entrance[0] = true;
-							myPosition p;
-							p.row = i;
-							p.col = j;
-							top.push_back(p);
-						}
-						else if (i == rows - 1)
-						{
-							mapPtr->entrance[1] = true;
-							myPosition p;
-							p.row = i;
-							p.col = j;
-							down.push_back(p);
-						}
-						else if (j == 0)
-						{
-							mapPtr->entrance[2] = true;
-							myPosition p;
-							p.row = i;
-							p.col = j;
-							left.push_back(p);
-						}
-						else if (j == cols - 1)
-						{
-							mapPtr->entrance[3] = true;
-							myPosition p;
-							p.row = i;
-							p.col = j;
-							right.push_back(p);
-						}
-					}
+					mapPtr->mapGridRemains[i][j].type = typeValue;
 				}
 			}
-		}
-		for (int i = 0; i < 4; i++)
-		{
-			if (mapPtr->entrance[i])
-			{
-				if (i == 0)
-					mapPtr->entrancePosition[i] = top[top.size() / 2];
-				else if (i == 1)
-					mapPtr->entrancePosition[i] = down[down.size() / 2];
-				else if (i == 2)
-					mapPtr->entrancePosition[i] = left[left.size() / 2];
-				else
-					mapPtr->entrancePosition[i] = right[right.size() / 2];
-			}
-		}
 
-		for (int i = 0; i < rows; ++i)
-		{
-			for (int j = 0; j < cols; ++j)
-			{
-				std::string type;
-				inFile >> type;
 
-				int typeValue = std::stoi(type);
-				if (typeValue >= Prop::ALL)
-				{
-					throw std::out_of_range("Invalid Map File: MapGrid ERROR !");
-				}
-				mapPtr->mapGridRemains[i][j].type = typeValue;
-			}
+			hashMap.insert({ mapPtr->getMapName(), mapPtr });
+
 		}
-		hashMap.insert({mapPtr->getMapName(), mapPtr});
 	}
+	catch (const std::exception& e) {
+		MessageBox(NULL, e.what(), "Error", MB_OK | MB_ICONERROR);
+		inFile.close();
+		return;
+	}
+
 
 
 	for (auto it : hashMap)
@@ -663,7 +677,6 @@ void MyMap::loadMap(std::string address)
 				}
 			}
 	}
-
 
 	// 关闭文件
 	inFile.close();

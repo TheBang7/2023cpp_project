@@ -84,8 +84,9 @@ void ViewMap::printSubMap(MyMap* subMap, int row, int col)
 
 void ViewMap::updateProp(MyMap* map, int row, int col)
 {
-	if (map->getElementType(row, col) != Prop::SUB_MAP)
+	if (map->getElementType(row, col) != Prop::SUB_MAP )
 		putimage(StartX + col * ratio, StartY + row * ratio, &this->props[map->getElementType(row, col)]);
+	else if(map->getSubMap(row, col)==nullptr)putimage(StartX + col * ratio, StartY + row * ratio, &this->props[Prop::BOX]);
 	else printSubMap(map->getSubMap(row, col), row, col);
 }
 

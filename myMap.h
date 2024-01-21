@@ -102,9 +102,9 @@ private:
 	void saveMap(std::ofstream& outFile, int countSub);
 	MapGrid** mapGrid; // 二维数组指针
 	MapGrid** mapGridRemains; // 二维数组指针
-	int numRows; // 地图行数
-	int numCols; // 地图列数
-	int size; //地图大小
+	int numRows=5; // 地图行数
+	int numCols=5; // 地图列数
+	int size=25; //地图大小
 	int manPositionRow; //小人在第几行
 	int manPositionCol; //小人在第几列
 	void generate();
