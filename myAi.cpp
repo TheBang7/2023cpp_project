@@ -29,7 +29,7 @@ double MyAi::getReward(MyMap* map, std::string& prev_state, std::string& state, 
 			for (int j = 1; j < map->getNumCols(); j++)
 			{
 				if ((map->getElementType(i, j) == Prop::HIT ||
-						map->getElementType(i, j) == Prop::SUB_MAP) &&
+						map->getElementType(i, j) == Prop::SUB_MAP|| map->getElementType(i, j) == Prop::MAIN_SUB) &&
 					map->getElementRemainsType(i, j) == Prop::BOX_DEST ||
 					map->getElementType(i, j) == Prop::MAN_HIT)
 					count++;
@@ -121,7 +121,7 @@ std::string MyAi::stateAbstration(MyMap* map)
 				std::string jj = std::to_string(j);
 				s.append("-").append(ii).append("_").append(jj);
 			}
-			else if (map->getElementType(i, j) == Prop::SUB_MAP)
+			else if (map->getElementType(i, j) == Prop::SUB_MAP|| map->getElementType(i, j) == Prop::MAIN_SUB)
 			{
 				std::string ii = std::to_string(i);
 				std::string jj = std::to_string(j);
