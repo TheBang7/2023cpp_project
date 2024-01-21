@@ -72,7 +72,7 @@ void ViewMap::printSubMap(MyMap* subMap, int row, int col)
 	{
 		for (int j = 0; j < subMap->getNumCols(); j++)
 		{
-			if (subMap->getElementType(i, j) != Prop::SUB_MAP)
+			if (subMap->getElementType(i, j) != Prop::SUB_MAP&& subMap->getElementType(i, j) != Prop::MAIN_SUB)
 				putimage(StartX + col * ratio + j * subRatio, StartY + row * ratio + i * subRatio,
 				         &this->subProps[subMap->getElementType(i, j)]);
 			else
@@ -84,7 +84,7 @@ void ViewMap::printSubMap(MyMap* subMap, int row, int col)
 
 void ViewMap::updateProp(MyMap* map, int row, int col)
 {
-	if (map->getElementType(row, col) != Prop::SUB_MAP )
+	if (map->getElementType(row, col) != Prop::SUB_MAP&& map->getElementType(row, col) != Prop::MAIN_SUB)
 		putimage(StartX + col * ratio, StartY + row * ratio, &this->props[map->getElementType(row, col)]);
 	else if(map->getSubMap(row, col)==nullptr)putimage(StartX + col * ratio, StartY + row * ratio, &this->props[Prop::BOX]);
 	else printSubMap(map->getSubMap(row, col), row, col);
@@ -116,7 +116,7 @@ void ViewMap::dealChange(MyChange* change)
 {
 	for (int i = 0; i < change->all; i++)
 	{
-		if (change->final[i] != Prop::SUB_MAP)
+		if (change->final[i] != Prop::SUB_MAP&& change->final[i] != Prop::MAIN_SUB)
 			updatePropByChange(change->row[i], change->col[i], change->final[i]);
 		else
 			printSubMap(change->finalSubMap[i], change->row[i], change->col[i]);
@@ -131,7 +131,7 @@ void ViewMap::backChange(MyChange* change)
 {
 	for (int i = 0; i < change->all; i++)
 	{
-		if (change->init[i] != Prop::SUB_MAP)
+		if (change->init[i] != Prop::SUB_MAP&& change->init[i] != Prop::MAIN_SUB)
 			updatePropByChange(change->row[i], change->col[i], change->init[i]);
 		else
 			printSubMap(change->initSubMap[i], change->row[i], change->col[i]);

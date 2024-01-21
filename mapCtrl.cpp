@@ -49,7 +49,8 @@ void loadAndRstView(ViewMap* viewMap, MyMap* map)
 	for (int i = 0; i < row; i++)
 		for (int j = 0; j < col; j++)
 		{
-			if (map->getElementType(i, j) == Prop::SUB_MAP && !map->getSubMap(i, j)->printed)
+			if ((map->getElementType(i, j) == Prop::SUB_MAP || map->getElementType(i, j) == Prop::MAIN_SUB) && !map->
+				getSubMap(i, j)->printed)
 			{
 				loadAndRstView(viewMap, map->getSubMap(i, j));
 			}
@@ -324,7 +325,7 @@ void MapCtrl::ownMapMove(MyMap* map, int rowChange, int colChange, int count, in
 		change->row[i] = initRow + i * rowChange;
 		change->col[i] = initCol + i * colChange;
 		change->init[i] = map->getElementType(change->row[i], change->col[i]);
-		if (change->init[i] == Prop::SUB_MAP)
+		if (change->init[i] == Prop::MAIN_SUB || change->init[i] == Prop::SUB_MAP)
 		{
 			change->initFather[i] = map;
 			change->initSubMap[i] = map->getSubMap(change->row[i], change->col[i]);
@@ -339,7 +340,7 @@ void MapCtrl::ownMapMove(MyMap* map, int rowChange, int colChange, int count, in
 			else
 			{
 				change->final[i] = firstGrid->type;
-				if (firstGrid->type == Prop::SUB_MAP)
+				if (firstGrid->type == Prop::MAIN_SUB || change->init[i] == Prop::SUB_MAP)
 				{
 					change->finalSubMap[i] = firstGrid->map;
 					change->finalFather[i] = map;
@@ -361,7 +362,7 @@ void MapCtrl::ownMapMove(MyMap* map, int rowChange, int colChange, int count, in
 		{
 			change->final[i] = change->init[i - 1];
 		}
-		if (change->final[i] == Prop::SUB_MAP && i > 0)
+		if ((change->final[i] == Prop::SUB_MAP || change->final[i] == Prop::MAIN_SUB) && i > 0)
 		{
 			change->finalFather[i] = map->getSubMap(change->row[i - 1], change->col[i - 1])->outsideMap;
 			change->finalSubMap[i] = map->getSubMap(change->row[i - 1], change->col[i - 1]);
@@ -407,7 +408,8 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 			(map->getElementType(finalRow, finalCol) == Prop::MAN && !loopTrans) ||
 			(map->getElementType(finalRow, finalCol) == Prop::MAN_HIT && !loopTrans) ||
 			map->getElementType(finalRow, finalCol) == Prop::HIT ||
-			map->getElementType(finalRow, finalCol) == Prop::SUB_MAP))
+			map->getElementType(finalRow, finalCol) == Prop::SUB_MAP ||
+			map->getElementType(finalRow, finalCol) == Prop::MAIN_SUB))
 	{
 		count++;
 		finalCol += colChange;
@@ -493,7 +495,8 @@ void MapCtrl::transMapMove(MyMap* map, int const rowChange, int const colChange,
 				backCol -= colChange;
 				backRow -= rowChange;
 				tcount--;
-				if (map->getElementType(backRow, backCol) == Prop::SUB_MAP)
+				if (map->getElementType(backRow, backCol) == Prop::SUB_MAP || map->getElementType(backRow, backCol) ==
+					Prop::MAIN_SUB)
 				{
 					MyMap* subMap = map->getSubMap(backRow, backCol);
 					if (subMap->getEntranceByMoveDirection_in(rowChange, colChange))

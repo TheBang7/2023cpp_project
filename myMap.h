@@ -31,6 +31,8 @@ enum Prop
 	//8
 	MAN_HIT,
 	//9
+	MAIN_SUB,
+	//10
 	ALL
 };
 
