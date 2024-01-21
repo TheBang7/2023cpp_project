@@ -32,7 +32,7 @@ MapCtrl::~MapCtrl()
 	}
 }
 
-void loadAndRstView(ViewMap* viewMap, MyMap* map)
+bool loadAndRstView(ViewMap* viewMap, MyMap* map)
 {
 	map->printed = true;
 	int row = map->getNumRows();
@@ -43,7 +43,7 @@ void loadAndRstView(ViewMap* viewMap, MyMap* map)
 			if (map->getElementType(i, j) == Prop::MAN_HIT || map->getElementType(i, j) == Prop::MAN)
 			{
 				viewMap->setMap(map);
-				return;
+				return true;
 			}
 		}
 	for (int i = 0; i < row; i++)
@@ -52,9 +52,11 @@ void loadAndRstView(ViewMap* viewMap, MyMap* map)
 			if ((map->getElementType(i, j) == Prop::SUB_MAP || map->getElementType(i, j) == Prop::MAIN_SUB) && !map->
 				getSubMap(i, j)->printed)
 			{
-				loadAndRstView(viewMap, map->getSubMap(i, j));
+				if(loadAndRstView(viewMap, map->getSubMap(i, j)))return true;
 			}
 		}
+	return false;
+
 }
 
 
@@ -84,7 +86,7 @@ void MapCtrl::begin(int& cen, int& room, int& ifload)
 			cleardevice();
 			chooseload(initMap, cen, room);
 			cleardevice();
-			loadAndRstView(viewMap, initMap);
+			if(!loadAndRstView(viewMap, initMap))viewMap->setMap(infMap);
 			setMap(viewMap->getMap());
 			for (MyMap* map : initMap->mapList)
 			{

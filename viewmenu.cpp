@@ -79,7 +79,7 @@ void choosesave(MyMap* map, int& cen, int& room)
 
 	y += 70; // 更新 y 坐标
 	TCHAR textExit1[20] = "存档四";
-	drawButton(x, y, w, h, textExit, WHITE);
+	drawButton(x, y, w, h, textExit1, WHITE);
 
 	MOUSEMSG m;
 	while (flag)
@@ -200,7 +200,7 @@ void chooseload(MyMap* map, int& cen, int& room)
 
 	y += 70; // 更新 y 坐标
 	TCHAR textExit1[20] = "存档四";
-	drawButton(x, y, w, h, textExit, WHITE);
+	drawButton(x, y, w, h, textExit1, WHITE);
 
 	MOUSEMSG m;
 	while (flag)
