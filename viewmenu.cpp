@@ -16,6 +16,8 @@
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
+int volume = 5; // 初始音量
+
 void transparentimage(IMAGE* dstimg, int x, int y, IMAGE* srcimg, UINT transparentcolor)
 {
 	HDC dstDC = GetImageHDC(dstimg);
@@ -27,14 +29,14 @@ void transparentimage(IMAGE* dstimg, int x, int y, IMAGE* srcimg, UINT transpare
 	TransparentBlt(dstDC, x, y, w, h, srcDC, 0, 0, w, h, transparentcolor);
 }
 
-void music(int a)
+void music(int& a)
 {
 	TCHAR cmd[256];
 	wsprintf(cmd, _T("setaudio music volume to %d"), a * 10);
 	mciSendString(cmd, NULL, 0, NULL);
 }
 
-void music1(int a)
+void music1(int& a)
 {
 	TCHAR cmd[256];
 	wsprintf(cmd, _T("setaudio music1 volume to %d"), a * 10);
@@ -530,7 +532,7 @@ void startGame(int& cen, int& room)
 	chooseCeng(cen, room);
 }
 
-int volume = 5; // 初始音量
+
 
 void celebrate()
 {
@@ -541,6 +543,7 @@ void celebrate()
 	mciSendString(_T("open resource/success.wav alias music1"), NULL, 0, NULL);
 
 	// 播放音乐
+	music1(volume);
 
 	mciSendString(_T("play music1"), NULL, 0, NULL);
 	// 设置字体颜色为白色
@@ -688,7 +691,7 @@ void menu1(int& cen, int& room)
 	mciSendString(_T("open resource/Amphitrite.mp3 alias music"), NULL, 0, NULL);
 
 	// 播放音乐
-	music(5);
+	music(volume);
 
 	mciSendString(_T("play music repeat"), NULL, 0, NULL);
 
