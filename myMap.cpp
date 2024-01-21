@@ -433,9 +433,13 @@ void MyMap::saveMap(std::ofstream& outFile, int countSub)
 			{
 				outFile << mapGrid[i][j].type << " ";
 			}
-			else
+			else if(mapGrid[i][j].type == Prop::SUB_MAP)
 			{
 				outFile << mapGrid[i][j].map->getMapName() << " ";
+				t++;
+			}
+			else {
+				outFile <<"MAIN::" << mapGrid[i][j].map->getMapName() << " ";
 				t++;
 			}
 		}
@@ -453,7 +457,7 @@ void MyMap::saveMap(std::ofstream& outFile, int countSub)
 	{
 		for (int j = 0; j < numCols; ++j)
 		{
-			if (mapGrid[i][j].type == Prop::SUB_MAP || mapGrid[i][j].type == Prop::MAIN_SUB && !mapGrid[i][j].map->
+			if ((mapGrid[i][j].type == Prop::SUB_MAP || mapGrid[i][j].type == Prop::MAIN_SUB) && !mapGrid[i][j].map->
 				printed)
 			{
 				mapGrid[i][j].map->saveMap(outFile, t);

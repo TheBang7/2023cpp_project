@@ -121,9 +121,11 @@ void ViewMap::dealChange(MyChange* change)
 		else
 			printSubMap(change->finalSubMap[i], change->row[i], change->col[i]);
 	}
-	if (map->outsideMap == map)
+	for(int i=0;i<map->getNumRows();i++)
+		for(int j=0;j<map->getNumCols();j++)
+	if (map->getSubMap(i,j)!=nullptr&& map->getSubMap(i, j) == map)
 	{
-		printSubMap(map, map->outsidePosition.row, map->outsidePosition.col);
+		printSubMap(map, i, j);
 	}
 }
 
